@@ -1,10 +1,13 @@
-from typing import Union, List
+from __future__ import annotations
+
+from typing import List
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import warnings
 import sys
 
 warnings.filterwarnings("ignore")
+
 
 class Point:
     x: int
@@ -24,126 +27,151 @@ class Point:
     def __repr__(self):
         return f"#{self.index} ({self.x}, {self.y}, {self.z})"
 
+
 class Face:
+    point_indexes: List[int]
+
+    def __init__(self, point_indexes: List[int]):
+        self.point_indexes = point_indexes
+
+
+def points_str(points: List[Point]) -> str:
+    result = ""
+    for point in points:
+        result += f"v {point.x:.5f} {point.y:.5f} {point.z:.5f}\n"
+    return result
+
+
+def faces_str(faces: List[Face]) -> str:
+    result = ""
+    for face in faces:
+        result += "f " + " ".join([str(i) for i in face.point_indexes]) + "\n"
+    return result
+
+
+class State:
     points: List[Point]
-    def __init__(self, points: List[Point]):
-        self.points = points
+    faces: List[Face]
+    obj_str: str
+
+    def __init__(self):
+        self.points = []
+        self.faces = []
+        self.obj_str = "mtllib master.mtl\n\n"
+
+    def box(
+        self, x: int, y: int, z: int, side: int, format: str = "matplotlib"
+    ) -> State:
+        if format == "obj":
+            coordinates = [
+                [x, y, z],
+                [x + side, y, z],
+                [x, y + side, z],
+                [x + side, y + side, z],
+                [x, y, z + side],
+                [x + side, y, z + side],
+                [x, y + side, z + side],
+                [x + side, y + side, z + side],
+            ]
+
+            points = [Point(x=j[0], y=j[1], z=j[2]) for j in coordinates]
+            offset = len(self.points)
+            faces = [
+                Face([offset + 1, offset + 2, offset + 4, offset + 3]),
+                Face([offset + 5, offset + 6, offset + 8, offset + 7]),
+                Face([offset + 1, offset + 3, offset + 7, offset + 5]),
+                Face([offset + 2, offset + 4, offset + 8, offset + 6]),
+                Face([offset + 1, offset + 2, offset + 6, offset + 5]),
+                Face([offset + 3, offset + 4, offset + 8, offset + 7]),
+            ]
+            self.points += points
+            self.faces += faces
+
+            self.obj_str += points_str(points)
+            self.obj_str += faces_str(faces)
+
+            return self
+        else:
+            points = [
+                [x, y, z],
+                [x + side, y, z],
+                [x + side, y + side, z],
+                [x, y + side, z],
+                [x, y, z],
+                [x, y, z + side],
+                [x + side, y, z + side],
+                [x + side, y, z],
+                [x + side, y, z + side],
+                [x + side, y + side, z + side],
+                [x + side, y + side, z],
+                [x + side, y + side, z + side],
+                [x, y + side, z + side],
+                [x, y + side, z],
+                [x, y + side, z + side],
+                [x, y, z + side],
+            ]
+            self.points += [Point(x=j[0], y=j[1], z=j[2]) for j in points]
+            return self
+
+    def dump_axes(self):
+        return [
+            [point.x for point in self.points],
+            [point.y for point in self.points],
+            [point.z for point in self.points],
+        ]
+
 
 def main():
 
-    if len(sys.argv) > 2 and sys.argv[1] == 'obj':
-        obj_str = box(0,0,0, 100, 'obj')
+    state = State()
+    if len(sys.argv) > 2 and sys.argv[1] == "obj":
+        state.box(0, 0, 0, 20, "obj")
+        state.box(20, 0, 0, 20, "obj")
+        state.box(0, 20, 0, 20, "obj")
+        state.box(0, 0, 20, 20, "obj")
 
-        square(0, 0, 0, 100)
-
-        with open(sys.argv[2], 'w') as f:
-            f.write(str(obj_str))
+        with open(sys.argv[2], "w") as f:
+            f.write(state.obj_str)
     else:
-        mpl.rcParams['legend.fontsize'] = 10
-
+        mpl.rcParams["legend.fontsize"] = 10
         fig = plt.figure()
-        ax = fig.gca(projection='3d')
+        ax = fig.gca(projection="3d")
 
-        xs, ys, zs = box(0,0,0, 100)
+        state.box(0, 0, 0, 100)
+
+        xs, ys, zs = state.dump_axes()
 
         ax.plot(xs, ys, zs)
         ax.legend()
 
         plt.show()
 
-def box(x: int, y: int, z: int, side: int, format: str = 'matplotlib') -> Union[List[List[int]], str]:
-    if format == 'obj':
-        x1_str = f"{x:.5f}"
-        y1_str = f"{y:.5f}"
-        z1_str = f"{z:.5f}"
-        z2_str = f"{z+side:.5f}"
-        x2_str = f"{x+side:.5f}"
-        y2_str = f"{y+side:.5f}"
-        obj_str =  f'''mtllib master.mtl
-v {x1_str} {y1_str} {z1_str}
-v {x2_str} {y1_str} {z1_str}
-v {x2_str} {y2_str} {z1_str}
-v {x1_str} {y2_str} {z1_str}
 
-v {x1_str} {y1_str} {z2_str}
-v {x2_str} {y1_str} {z2_str}
-v {x2_str} {y2_str} {z2_str}
-v {x1_str} {y2_str} {z2_str}
+#
+# def square(x: int, y: int, z: int, side: int, ignored_axis: str = 'z') -> Face:
+#     points: List[Point] = []
+#     if ignored_axis == 'y':
+#         points.append(Point(x,y,z))
+#         points.append(Point(x+side,y,z))
+#         points.append(Point(x+side,y,z+side))
+#         points.append(Point(x,y,z+side))
+#         points.append(Point(x,y,z))
+#     if ignored_axis == 'x':
+#         points.append(Point(x,y,z))
+#         points.append(Point(x,y,z+side))
+#         points.append(Point(x,y+side,z+side))
+#         points.append(Point(x,y+side,z))
+#         points.append(Point(x,y,z))
+#     else:
+#         points.append(Point(x,y,z))
+#         points.append(Point(x+side,y,z))
+#         points.append(Point(x+side,y+side,z))
+#         points.append(Point(x,y+side,z))
+#         points.append(Point(x,y,z))
+#
+#     face = Face(points)
+#     return face
 
-f 1 2 3 4
-f 5 6 7 8
 
-f 1 2 6 5
-f 3 4 8 7
-
-f 2 3 7 6
-f 4 1 5 8
-
-usemtl wood
-'''
-        return obj_str
-    else:
-        points =  [
-            [x,y,z],
-            [x+side,y,z],
-            [x+side,y+side,z],
-            [x,y+side,z],
-            [x,y,z],
-            [x,y,z+side],
-            [x+side,y,z+side],
-            [x+side,y,z],
-            [x+side,y,z+side],
-            [x+side,y+side,z+side],
-            [x+side,y+side,z],
-            [x+side,y+side,z+side],
-            [x,y+side,z+side],
-            [x,y+side,z],
-            [x,y+side,z+side],
-            [x,y,z+side],
-        ]
-        return [
-            [x[0] for x in points],
-            [x[1] for x in points],
-            [x[2] for x in points],
-        ]
-
-def square(x: int, y: int, z: int, side: int, ignored_axis: str = 'z') -> List[Point]:
-    '''
-    returns {
-        xs: list of numbers for x dimension
-        ys: list of numbers for y dimension
-        zs: list of numbers for z dimension
-    }
-    '''
-
-    points: List[Point] = []
-    if ignored_axis == 'y':
-        points.append(Point(x,y,z))
-        points.append(Point(x+side,y,z))
-        points.append(Point(x+side,y,z+side))
-        points.append(Point(x,y,z+side))
-        points.append(Point(x,y,z))
-    if ignored_axis == 'x':
-        points.append(Point(x,y,z))
-        points.append(Point(x,y,z+side))
-        points.append(Point(x,y+side,z+side))
-        points.append(Point(x,y+side,z))
-        points.append(Point(x,y,z))
-    else:
-        points.append(Point(x,y,z))
-        points.append(Point(x+side,y,z))
-        points.append(Point(x+side,y+side,z))
-        points.append(Point(x,y+side,z))
-        points.append(Point(x,y,z))
-
-    print(points)
-    return points
-
-    # return [
-    #     [x[0] for x in points],
-    #     [x[1] for x in points],
-    #     [x[2] for x in points],
-    # ]
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
