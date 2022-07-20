@@ -10,14 +10,19 @@ class Point:
     x: int
     y: int
     z: int
+    index: int = 1
 
-    index: int
+    used: int = 0
 
-    def __init__(self, x: int, y: int, z: int, index: int):
+    def __init__(self, x: int, y: int, z: int):
         self.x = x
         self.y = y
         self.z = z
-        self.index = index
+        Point.used += 1
+        self.index = Point.used
+
+    def __repr__(self):
+        return f"#{self.index} ({self.x}, {self.y}, {self.z})"
 
 class Face:
     points: List[Point]
@@ -28,6 +33,9 @@ def main():
 
     if len(sys.argv) > 2 and sys.argv[1] == 'obj':
         obj_str = box(0,0,0, 100, 'obj')
+
+        square(0, 0, 0, 100)
+
         with open(sys.argv[2], 'w') as f:
             f.write(str(obj_str))
     else:
@@ -99,15 +107,7 @@ usemtl wood
             [x[2] for x in points],
         ]
 
-def concat_3d(head: List[List[int]], tail: List[List[int]]) -> List[List[int]]:
-    return [
-        head[0] + tail[0],
-        head[1] + tail[1],
-        head[2] + tail[2],
-    ]
-    
-
-def square(x: int, y: int, z: int, side: int, ignored_axis: str = 'z') -> List[List[int]]:
+def square(x: int, y: int, z: int, side: int, ignored_axis: str = 'z') -> List[Point]:
     '''
     returns {
         xs: list of numbers for x dimension
@@ -116,34 +116,34 @@ def square(x: int, y: int, z: int, side: int, ignored_axis: str = 'z') -> List[L
     }
     '''
 
-    points: List[List[int]] = []
+    points: List[Point] = []
     if ignored_axis == 'y':
-        points: List[List[int]] = []
-        points.append([x,y,z])
-        points.append([x+side,y,z])
-        points.append([x+side,y,z+side])
-        points.append([x,y,z+side])
-        points.append([x,y,z])
+        points.append(Point(x,y,z))
+        points.append(Point(x+side,y,z))
+        points.append(Point(x+side,y,z+side))
+        points.append(Point(x,y,z+side))
+        points.append(Point(x,y,z))
     if ignored_axis == 'x':
-        points: List[List[int]] = []
-        points.append([x,y,z])
-        points.append([x,y,z+side])
-        points.append([x,y+side,z+side])
-        points.append([x,y+side,z])
-        points.append([x,y,z])
+        points.append(Point(x,y,z))
+        points.append(Point(x,y,z+side))
+        points.append(Point(x,y+side,z+side))
+        points.append(Point(x,y+side,z))
+        points.append(Point(x,y,z))
     else:
-        points.append([x,y,z])
-        points.append([x+side,y,z])
-        points.append([x+side,y+side,z])
-        points.append([x,y+side,z])
-        points.append([x,y,z])
+        points.append(Point(x,y,z))
+        points.append(Point(x+side,y,z))
+        points.append(Point(x+side,y+side,z))
+        points.append(Point(x,y+side,z))
+        points.append(Point(x,y,z))
 
+    print(points)
+    return points
 
-    return [
-        [x[0] for x in points],
-        [x[1] for x in points],
-        [x[2] for x in points],
-    ]
+    # return [
+    #     [x[0] for x in points],
+    #     [x[1] for x in points],
+    #     [x[2] for x in points],
+    # ]
 
 if __name__ == '__main__':
     main()
