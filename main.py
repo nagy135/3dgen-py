@@ -2,27 +2,48 @@ from typing import Union, List
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import warnings
+import sys
 
 warnings.filterwarnings("ignore")
 
+class Point:
+    x: int
+    y: int
+    z: int
+
+    index: int
+
+    def __init__(self, x: int, y: int, z: int, index: int):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.index = index
+
+class Face:
+    points: List[Point]
+    def __init__(self, points: List[Point]):
+        self.points = points
+
 def main():
 
-    mpl.rcParams['legend.fontsize'] = 10
+    if len(sys.argv) > 2 and sys.argv[1] == 'obj':
+        obj_str = box(0,0,0, 100, 'obj')
+        with open(sys.argv[2], 'w') as f:
+            f.write(str(obj_str))
+    else:
+        mpl.rcParams['legend.fontsize'] = 10
 
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
 
-    # xs, ys, zs = box(0,0,0, 100)
-    obj_str = box(0,0,0, 100, 'obj')
-    with open('square_gen.obj', 'w') as f:
-        f.write(str(obj_str))
+        xs, ys, zs = box(0,0,0, 100)
 
-    # ax.plot(xs, ys, zs)
-    # ax.legend()
-    #
-    # plt.show()
+        ax.plot(xs, ys, zs)
+        ax.legend()
 
-def box(x: int, y: int, z: int, side: int, format: str) -> Union[List[List[int]], str]:
+        plt.show()
+
+def box(x: int, y: int, z: int, side: int, format: str = 'matplotlib') -> Union[List[List[int]], str]:
     if format == 'obj':
         x1_str = f"{x:.5f}"
         y1_str = f"{y:.5f}"
