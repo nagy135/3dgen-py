@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Set
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import warnings
@@ -34,6 +34,9 @@ class Face:
     def __init__(self, point_indexes: List[int]):
         self.point_indexes = point_indexes
 
+    def __repr__(self):
+        return f"{self.point_indexes}"
+
 
 def points_str(points: List[Point]) -> str:
     result = ""
@@ -58,6 +61,33 @@ class State:
         self.points = []
         self.faces = []
         self.obj_str = "mtllib master.mtl\n\n"
+
+    def remove_duplicate_faces(self):
+        duplicate_face_indexes: Set[int] = set()
+        for j in range(len(self.faces)):
+            for k in range(j + 1, len(self.faces)):
+                face = self.faces[j]
+                face2 = self.faces[k]
+
+                points = list(
+                    filter(lambda x: x.index in face.point_indexes, self.points)
+                )
+                points2 = list(
+                    filter(lambda x: x.index in face2.point_indexes, self.points)
+                )
+
+                first = [point.x + point.y * 1000 + point.z * 1000000 for point in points]
+                second = [point.x + point.y * 1000 + point.z * 1000000 for point in points2]
+
+                if set(first) == set(second):
+                    duplicate_face_indexes.add(k)
+
+        print("dupl", duplicate_face_indexes)
+        new_faces = []
+        for index in range(len(self.faces)):
+            if index not in duplicate_face_indexes:
+                new_faces.append(self.faces[index])
+        self.faces = new_faces
 
     def box(
         self, x: int, y: int, z: int, side: int, format: str = "matplotlib"
@@ -125,10 +155,29 @@ def main():
 
     state = State()
     if len(sys.argv) > 2 and sys.argv[1] == "obj":
-        state.box(0, 0, 0, 20, "obj")
-        state.box(20, 0, 0, 20, "obj")
-        state.box(0, 20, 0, 20, "obj")
-        state.box(0, 0, 20, 20, "obj")
+        # state.box(0, 0, 0, 20, "obj")
+        #
+        # state.box(20, 0, 0, 20, "obj")
+        # state.box(20, 0, 20, 20, "obj")
+        # state.box(20, 0, 40, 20, "obj")
+        # state.box(20, 0, 60, 20, "obj")
+        # state.box(40, 0, 60, 20, "obj")
+        # state.box(40, 0, 80, 20, "obj")
+        # state.box(40, 0, 100, 20, "obj")
+        # state.box(60, 0, 100, 20, "obj")
+
+        side = 20
+        x_offset = 0
+        z_offset = 0
+        for _ in range(1, 7):
+            state.box(x_offset, 0, z_offset, side, "obj")
+            x_offset += side
+            state.box(x_offset, 0, z_offset, side, "obj")
+            z_offset += side
+            state.box(x_offset, 0, z_offset, side, "obj")
+            z_offset += side
+
+        state.remove_duplicate_faces()
 
         with open(sys.argv[2], "w") as f:
             f.write(state.obj_str)
