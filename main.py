@@ -125,6 +125,41 @@ class State:
 
         return self
 
+    def face(
+        self,
+        x: int,
+        y: int,
+        z: int,
+        x2: int,
+        y2: int,
+        z2: int,
+        x3: int,
+        y3: int,
+        z3: int,
+    ) -> State:
+        mid_point = [(x2 + x3) / 2, (y2 + y3) / 2, (z2 + z3) / 2]
+        coordinates = [
+            [x, y, z],
+            [x2, y2, z2],
+            [
+                mid_point[0] - (x - mid_point[0]),
+                mid_point[1] - (y - mid_point[1]),
+                mid_point[2] - (z - mid_point[2]),
+            ],
+            [x3, y3, z3],
+        ]
+
+        points = [Point(x=j[0], y=j[1], z=j[2]) for j in coordinates]
+        offset = len(self.points)
+
+        faces = [
+            Face([offset + 1, offset + 2, offset + 3, offset + 4]),
+        ]
+        self.points += points
+        self.faces += faces
+
+        return self
+
 
 def main():
     parser = argparse.ArgumentParser(description="Generates obj files from code")
@@ -166,12 +201,25 @@ def generate_logic(state: State):
     state.box(0, 0, 0, side)
     state.box(0, 0, side, side)
     state.box(side, 0, 0, side)
-    state.box(side*2, 0, 0, side)
-    state.rect(side*2, 0, side, side, side, side*3)
-    state.box(side*2, 0, side*4, side)
-    state.box(side*3, 0, side*4, side)
-    state.box(side*4, 0, side*4, side)
-    state.box(side*4, 0, side*3, side)
+    state.box(side * 2, 0, 0, side)
+    state.rect(side * 2, 0, side, side, side, side * 3)
+    state.box(side * 2, 0, side * 4, side)
+    state.box(side * 3, 0, side * 4, side)
+    state.box(side * 4, 0, side * 4, side)
+    state.box(side * 4, 0, side * 3, side)
+    state.face(
+        0,
+        side,
+        side*2,
+
+        side,
+        side,
+        side*2,
+        
+        0,
+        side,
+        side*3
+    )
 
 
 if __name__ == "__main__":
