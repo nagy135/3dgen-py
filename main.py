@@ -145,18 +145,8 @@ def main():
         print("OPEN PREVIEW")
 
     state = State()
-    side = 20
-    # state.box(0, 0, 0, side)
-    # state.box(side, 0, 0, side)
-    x_offset = 0
-    z_offset = 0
-    for _ in range(1, 3):
-        state.box(x_offset, 0, z_offset, side)
-        x_offset += side
-        state.box(x_offset, 0, z_offset, side)
-        z_offset += side
-        state.box(x_offset, 0, z_offset, side)
-        z_offset += side
+
+    generate_logic(state)
 
     state.remove_duplicate_faces()
     state.write_obj_str()
@@ -166,6 +156,24 @@ def main():
 
     if args.preview_mode:
         start(args.filename)
+
+def generate_logic(state: State):
+    side = 20
+    # state.box(0, 0, 0, side)
+    # state.box(side, 0, 0, side)
+    x_offset = 0
+    z_offset = 0
+    y_offset = 0
+    for _ in range(1, 5):
+        state.box(x_offset, y_offset, z_offset, side)
+        x_offset += side
+        state.box(x_offset, y_offset, z_offset, side)
+        z_offset += side
+        state.box(x_offset, y_offset, z_offset, side)
+        z_offset += side
+        state.box(x_offset, y_offset, z_offset, side)
+        y_offset += side
+
 
 
 if __name__ == "__main__":
