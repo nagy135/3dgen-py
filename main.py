@@ -96,9 +96,9 @@ class State:
         self.faces = new_faces
 
     def box(self, x: int, y: int, z: int, side: int) -> State:
-        return self.rect(x, y, z, side, side, side)
+        return self.cuboid(x, y, z, side, side, side)
 
-    def rect(self, x: int, y: int, z: int, w_x: int, w_y: int, w_z: int) -> State:
+    def cuboid(self, x: int, y: int, z: int, w_x: int, w_y: int, w_z: int) -> State:
         coordinates = [
             [x, y, z],
             [x + w_x, y, z],
@@ -125,7 +125,7 @@ class State:
 
         return self
 
-    def face(
+    def rect(
         self,
         x: int,
         y: int,
@@ -137,16 +137,19 @@ class State:
         y3: int,
         z3: int,
     ) -> State:
-        mid_point = [(x2 + x3) / 2, (y2 + y3) / 2, (z2 + z3) / 2]
+        '''
+        Creates rectangular face between given 3 corners, calculating 4th one
+        '''
+        mid_point = [(x + x3) / 2, (y + y3) / 2, (z + z3) / 2]
         coordinates = [
             [x, y, z],
             [x2, y2, z2],
-            [
-                mid_point[0] - (x - mid_point[0]),
-                mid_point[1] - (y - mid_point[1]),
-                mid_point[2] - (z - mid_point[2]),
-            ],
             [x3, y3, z3],
+            [
+                mid_point[0] - (x2 - mid_point[0]),
+                mid_point[1] - (y2 - mid_point[1]),
+                mid_point[2] - (z2 - mid_point[2]),
+            ],
         ]
 
         points = [Point(x=j[0], y=j[1], z=j[2]) for j in coordinates]
@@ -202,23 +205,15 @@ def generate_logic(state: State):
     state.box(0, 0, side, side)
     state.box(side, 0, 0, side)
     state.box(side * 2, 0, 0, side)
-    state.rect(side * 2, 0, side, side, side, side * 3)
+    state.cuboid(side * 2, 0, side, side, side, side * 3)
     state.box(side * 2, 0, side * 4, side)
     state.box(side * 3, 0, side * 4, side)
     state.box(side * 4, 0, side * 4, side)
     state.box(side * 4, 0, side * 3, side)
-    state.face(
-        0,
-        side,
-        side*2,
-
-        side,
-        side,
-        side*2,
-        
-        0,
-        side,
-        side*3
+    state.rect(
+        side * 4, 0, side*3,
+        side * 4, 0, 0,
+        side * 7, 0, 0,
     )
 
 
