@@ -3,17 +3,20 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
 import ctypes
+import sys
 
 from numpy.typing import NDArray
 
-gCamAng = 0.0
+gCamAngX = 0.0
+gCamAngY = -90.0
+gCamAngZ = 0.0
 gCamHeight = 3.0
 vertices = []
 normals = []
 faces = []
 dropped = 0
 modeFlag = 0
-distanceFromOrigin = 45
+distanceFromOrigin = 100
 
 
 def dropCallback(window, paths):
@@ -138,7 +141,7 @@ def createVertexArraySeparate():
 
 
 def render():
-    global gCamAng, gCamHeight, distanceFromOrigin, dropped
+    global gCamAng, gCamHeight, distanceFromOrigin, dropped, gEyeX, gEyeY, gEyeZ
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     glEnable(GL_DEPTH_TEST)
@@ -149,7 +152,9 @@ def render():
     gluPerspective(distanceFromOrigin, 1, 1, 10)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-    gluLookAt(5 * np.sin(gCamAng), gCamHeight, 5 * np.cos(gCamAng), 0.5, 0, 0, 0, 1, 0)
+
+    # gluLookAt(gEyeX, gEyeY, gEyeZ, 0, 0, 0, 0, 0, 1)
+    gluLookAt(5 * np.sin(gCamAngX), 5 * np.sin(gCamAngY), 5 * np.cos(gCamAngX) + 5 * np.sin(gCamAngZ), 0.5, 0, 0, 0, 1, 0)
 
     drawFrame()
     glEnable(GL_LIGHTING)  # comment: no lighting
@@ -229,18 +234,21 @@ def drawFrame():
 
 
 def key_callback(window, key, scancode, action, mods):
-    global gCamAng, gCamHeight, modeFlag, distanceFromOrigin
+    global gCamAng, gCamHeight, modeFlag, distanceFromOrigin, gCamAngX, gCamAngY, gCamAngZ 
+    rotate_step = 2
     if action == glfw.PRESS or action == glfw.REPEAT:
         if key == glfw.KEY_H:
-            gCamAng += np.radians(-2 % 360)
+            gCamAngX += np.radians(-rotate_step % 360)
         elif key == glfw.KEY_L:
-            gCamAng += np.radians(2 % 360)
-        elif key == glfw.KEY_K:
-            if gCamHeight < 9:
-                gCamHeight += 0.1
+            gCamAngX += np.radians(rotate_step % 360)
         elif key == glfw.KEY_J:
-            if gCamHeight > -9:
-                gCamHeight += -0.1
+            gCamAngY += np.radians(-rotate_step % 360)
+        elif key == glfw.KEY_K:
+            gCamAngY += np.radians(rotate_step % 360)
+        elif key == glfw.KEY_N:
+            gCamAngZ += np.radians(-rotate_step % 360)
+        elif key == glfw.KEY_P:
+            gCamAngZ += np.radians(rotate_step % 360)
         elif key == glfw.KEY_Z:
             if modeFlag == 0:
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
@@ -258,6 +266,8 @@ def key_callback(window, key, scancode, action, mods):
             gCamAng = 0.0
             gCamHeight = 1.0
             distanceFromOrigin = 45
+        elif key == glfw.KEY_Q:
+            glfw.set_window_should_close(window, GL_TRUE)
 
 
 gVertexArraySeparate = np.zeros((3, 3))
