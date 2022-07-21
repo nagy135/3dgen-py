@@ -263,7 +263,7 @@ def key_callback(window, key, scancode, action, mods):
 gVertexArraySeparate = np.zeros((3, 3))
 
 
-def main():
+def start(filename: str):
     global gVertexArraySeparate
     if not glfw.init():
         return
@@ -277,7 +277,7 @@ def main():
     glfw.swap_interval(1)
 
     count = 0
-    dropCallback(window, ["brick.obj"])
+    dropCallback(window, [filename])
     while not glfw.window_should_close(window):
         glfw.poll_events()
         count += 1
@@ -301,4 +301,4 @@ def framebuffer_size_callback(window, width, height):
 
 
 if __name__ == "__main__":
-    main()
+    start('brick.obj')

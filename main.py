@@ -1,7 +1,11 @@
+#!/usr/bin/env python
+
 from __future__ import annotations
 
 from typing import List, Set
 import sys
+import argparse
+from pyrender import start
 
 class Point:
     x: int
@@ -81,13 +85,10 @@ class State:
                     duplicate_face_indexes.add(k)
                     duplicate_face_indexes.add(j)
 
-        print("dupl", duplicate_face_indexes)
         new_faces = []
         for index in range(len(self.faces)):
             if index not in duplicate_face_indexes:
                 new_faces.append(self.faces[index])
-            else:
-                print('skipping', self.faces[index])
         self.faces = new_faces
 
     def box(
@@ -120,6 +121,16 @@ class State:
         return self
 
 def main():
+    parser = argparse.ArgumentParser(description='Generates obj files from code')
+
+    parser.add_argument('filename', metavar='filename', type=str,
+                        help='file to output .obj to')
+
+    parser.add_argument('--preview', '-p', dest='preview_mode', action='store_const',
+                        const=True, default=False,
+                        help='preview after generate')
+
+    args = parser.parse_args()
 
     state = State()
     side = 20
@@ -138,8 +149,11 @@ def main():
     state.remove_duplicate_faces()
     state.write_obj_str()
 
-    with open(sys.argv[1], "w") as f:
+    with open(args.filename, "w") as f:
         f.write(state.obj_str)
+
+    if args.preview_mode:
+        start(args.filename)
 
 if __name__ == "__main__":
     main()
