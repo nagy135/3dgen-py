@@ -98,7 +98,26 @@ class State:
     def box(self, x: int, y: int, z: int, side: int) -> State:
         return self.cuboid(x, y, z, side, side, side)
 
-    def cuboid(self, x: int, y: int, z: int, w_x: int, w_y: int, w_z: int) -> State:
+    def cuboid(
+        self,
+        x: int,
+        y: int,
+        z: int,
+        w_x: int,
+        w_y: int,
+        w_z: int,
+        g_x: int | None = None,
+        g_y: int | None = None,
+        g_z: int | None = None,
+    ) -> State:
+        if all(map(lambda x: x is not None, [g_x, g_y, g_z])):
+            raise Exception(
+                "Gap on one axis needs to be None (so that gap leads outside)"
+            )
+        assert (
+            len(list(filter(lambda x: x is not None, [g_x, g_y, g_z]))) == 2
+        ), "Expected 2 gap params"
+
         coordinates = [
             [x, y, z],
             [x + w_x, y, z],
@@ -111,16 +130,222 @@ class State:
         ]
 
         points = [Point(x=j[0], y=j[1], z=j[2]) for j in coordinates]
+
         offset = len(self.points)
-        faces = [
-            Face([offset + 1, offset + 2, offset + 4, offset + 3]),
-            Face([offset + 5, offset + 6, offset + 8, offset + 7]),
-            Face([offset + 1, offset + 3, offset + 7, offset + 5]),
-            Face([offset + 2, offset + 4, offset + 8, offset + 6]),
-            Face([offset + 1, offset + 2, offset + 6, offset + 5]),
-            Face([offset + 3, offset + 4, offset + 8, offset + 7]),
-        ]
         self.points += points
+
+        bottom = [offset + 1, offset + 2, offset + 4, offset + 3]
+        top = [offset + 5, offset + 6, offset + 8, offset + 7]
+        left = [offset + 1, offset + 3, offset + 7, offset + 5]
+        right = [offset + 2, offset + 4, offset + 8, offset + 6]
+        front = [offset + 1, offset + 2, offset + 6, offset + 5]
+        back = [offset + 3, offset + 4, offset + 8, offset + 7]
+
+        faces: List[Face] = []
+
+        if g_x is None:
+            if g_y is not None and g_z is not None:
+                faces = [Face(x) for x in [top, bottom, front, back]]
+                for x_offset in [x, x+w_x]:
+                    self.rect(
+                        x_offset, y, z,
+                        x_offset, y+g_y, z + g_z,
+                        x_offset, y+g_y, z
+                    )
+                    self.rect(
+                        x_offset, y, z+g_z,
+                        x_offset, y+g_y, z+w_z-g_z,
+                        x_offset, y+g_y, z+g_z
+                    )
+                    self.rect(
+                        x_offset, y, z+w_z-g_z,
+                        x_offset, y+g_y, z+w_z,
+                        x_offset, y+g_y, z+w_z-g_z,
+                    )
+
+                    self.rect(
+                        x_offset, y+w_y-g_y, z,
+                        x_offset, y+w_y, z+ g_z,
+                        x_offset, y+w_y, z
+                    )
+                    self.rect(
+                        x_offset, y+w_y-g_y, z+g_z,
+                        x_offset, y+w_y, z+w_z-g_z,
+                        x_offset, y+w_y, z+g_z
+                    )
+                    self.rect(
+                        x_offset, y+w_y-g_y, z+w_z-g_z,
+                        x_offset, y+w_y, z+w_z,
+                        x_offset, y+w_y, z+w_z-g_z,
+                    )
+
+                    self.rect(
+                        x_offset, y+g_y, z,
+                        x_offset, y+w_y-g_y, z+g_z,
+                        x_offset, y+w_y-g_y, z
+                    )
+                    self.rect(
+                        x_offset, y+g_y, z+w_z-g_z,
+                        x_offset, y+w_y-g_y, z+w_z,
+                        x_offset, y+w_y-g_y, z+w_z-g_z
+                    )
+                self.rect(
+                    x, y+g_y, z+g_z,
+                    x+w_x, y+w_y-g_y, z+g_z,
+                    x+w_x, y+g_y, z+g_z
+                )
+                self.rect(
+                    x, y+g_y, z+w_z-g_z,
+                    x+w_x, y+w_y-g_y, z+w_z-g_z,
+                    x+w_x, y+g_y, z+w_z-g_z
+                )
+
+                self.rect(
+                    x, y+g_y, z+g_z,
+                    x+w_x, y+g_y, z+w_z-g_z,
+                    x+w_x, y+g_y, z+g_z
+                )
+                self.rect(
+                    x, y+w_y-g_y, z+g_z,
+                    x+w_x, y+w_y-g_y, z+w_z-g_z,
+                    x+w_x, y+w_y-g_y, z+g_z
+                )
+
+        if g_y is None:
+            faces = [Face(x) for x in [top, bottom, left, right]]
+            if g_x is not None and g_z is not None:
+                for y_offset in [y, y+w_y]:
+                    self.rect(
+                        x, y_offset, z,
+                        x + g_x, y_offset, z + g_z,
+                        x + g_x, y_offset, z
+                    )
+                    self.rect(
+                        x, y_offset, z+g_z,
+                        x+g_x, y_offset, z+w_z-g_z,
+                        x+g_x, y_offset, z+g_z
+                    )
+                    self.rect(
+                        x, y_offset, z+w_z-g_z,
+                        x+g_x, y_offset, z+w_z,
+                        x+g_x, y_offset, z+w_z-g_z,
+                    )
+
+                    self.rect(
+                        x+w_x-g_x, y_offset, z,
+                        x+w_x, y_offset, z + g_z,
+                        x+w_x, y_offset, z
+                    )
+                    self.rect(
+                        x+w_x-g_x, y_offset, z+g_z,
+                        x+w_x, y_offset, z+w_z-g_z,
+                        x+w_x, y_offset, z+g_z
+                    )
+                    self.rect(
+                        x+w_x-g_x, y_offset, z+w_z-g_z,
+                        x+w_x, y_offset, z+w_z,
+                        x+w_x, y_offset, z+w_z-g_z,
+                    )
+
+                    self.rect(
+                        x+g_x, y_offset, z,
+                        x+w_x-g_x, y_offset, z+g_z,
+                        x+w_x-g_x, y_offset, z
+                    )
+                    self.rect(
+                        x+g_x, y_offset, z+w_z-g_z,
+                        x+w_x-g_x, y_offset, z+w_z,
+                        x+w_x-g_x, y_offset, z+w_z-g_z
+                    )
+                self.rect(
+                    x+g_x, y, z+g_z,
+                    x+w_x-g_x, y+w_y, z+g_z,
+                    x+g_x, y+w_y, z+g_z
+                )
+                self.rect(
+                    x+g_x, y, z+w_z-g_z,
+                    x+w_x-g_x, y+w_y, z+w_z-g_z,
+                    x+g_x, y+w_y, z+w_z-g_z
+                )
+
+                self.rect(
+                    x+g_x, y, z+g_z,
+                    x+g_x, y+w_y, z+w_z-g_z,
+                    x+g_x, y+w_y, z+g_z
+                )
+                self.rect(
+                    x+w_x-g_x, y, z+g_z,
+                    x+w_x-g_x, y+w_y, z+w_z-g_z,
+                    x+w_x-g_x, y+w_y, z+g_z
+                )
+        if g_z is None:
+            faces = [Face(x) for x in [front, back, left, right]]
+            if g_x is not None and g_y is not None:
+                for z_offset in [z, z+w_z]:
+                    self.rect(
+                        x, y, z_offset,
+                        x + g_x, y + g_y, z_offset,
+                        x + g_x, y, z_offset
+                    )
+                    self.rect(
+                        x, y+g_y, z_offset,
+                        x+g_x, y+w_y-g_y, z_offset,
+                        x+g_x, y+g_y, z_offset
+                    )
+                    self.rect(
+                        x, y+w_y-g_y, z_offset,
+                        x+g_x, y+w_y, z_offset,
+                        x+g_x, y+w_y-g_y, z_offset,
+                    )
+
+                    self.rect(
+                        x+w_x-g_x, y, z_offset,
+                        x+w_x, y+g_y, z_offset,
+                        x+w_x, y, z_offset
+                    )
+                    self.rect(
+                        x+w_x-g_x, y+g_y, z_offset,
+                        x+w_x, y+w_y-g_y, z_offset,
+                        x+w_x, y+g_y, z_offset
+                    )
+                    self.rect(
+                        x+w_x-g_x, y+w_y-g_y, z_offset,
+                        x+w_x, y+w_y, z_offset,
+                        x+w_x, y+w_y-g_y, z_offset,
+                    )
+
+                    self.rect(
+                        x+g_x, y, z_offset,
+                        x+w_x-g_x, y+g_y, z_offset,
+                        x+w_x-g_x, y, z_offset
+                    )
+                    self.rect(
+                        x+g_x, y+w_y-g_y, z_offset,
+                        x+w_x-g_x, y+w_y, z_offset,
+                        x+w_x-g_x, y+w_y-g_y, z_offset
+                    )
+                self.rect(
+                    x+g_x, y+g_y, z,
+                    x+w_x-g_x, y+g_y, z+w_z,
+                    x+g_x, y+g_y, z+w_z
+                )
+                self.rect(
+                    x+g_x, y+w_y-g_y, z,
+                    x+w_x-g_x, y+w_y-g_y, z+w_z,
+                    x+g_x, y+w_y-g_y, z+w_z
+                )
+
+                self.rect(
+                    x+g_x, y+g_y, z,
+                    x+g_x, y+w_y-g_y, z+w_z,
+                    x+g_x, y+g_y, z+w_z
+                )
+                self.rect(
+                    x+w_x-g_x, y+g_y, z,
+                    x+w_x-g_x, y+w_y-g_y, z+w_z,
+                    x+w_x-g_x, y+g_y, z+w_z
+                )
+
         self.faces += faces
 
         return self
@@ -137,10 +362,10 @@ class State:
         y3: int,
         z3: int,
     ) -> State:
-        '''
+        """
         Creates rectangular face between given 3 corners, calculating 4th one
         First 2 points must cross diagonally
-        '''
+        """
         mid_point = [(x + x2) / 2, (y + y2) / 2, (z + z2) / 2]
         coordinates = [
             [x, y, z],
@@ -201,34 +426,40 @@ def main():
 
 
 def generate_logic(state: State):
-    example_predefined_points(state)
-    pass
+    example_gap(state)
+
+
+def example_gap(state: State):
+    u = 50
+    gap = 5
+    state.cuboid(0, 0, 0, u, u, u, gap, gap, None)
+
 
 def example_predefined_points(state: State):
     u = 28
 
-    p1 = [0,0,0]
-    p2 = [u,0,0]
-    p3 = [2*u,0,0]
-    p4 = [3*u,0,0]
-    p5 = [0,u,0]
-    p6 = [u,u,0]
-    p7 = [2*u,u,0]
-    p8 = [3*u,u,0]
+    p1 = [0, 0, 0]
+    p2 = [u, 0, 0]
+    p3 = [2 * u, 0, 0]
+    p4 = [3 * u, 0, 0]
+    p5 = [0, u, 0]
+    p6 = [u, u, 0]
+    p7 = [2 * u, u, 0]
+    p8 = [3 * u, u, 0]
 
     p9 = [u, 0, u]
-    p10 = [2*u, 0, u]
-    p11 = [2*u, u, u]
+    p10 = [2 * u, 0, u]
+    p11 = [2 * u, u, u]
     p12 = [u, u, u]
 
-    p13 = [0,0,2*u]
-    p14 = [u,0,2*u]
-    p15 = [2*u,0,2*u]
-    p16 = [3*u,0,2*u]
-    p17 = [0,u,2*u]
-    p18 = [u,u,2*u]
-    p19 = [2*u,u,2*u]
-    p20 = [3*u,u,2*u]
+    p13 = [0, 0, 2 * u]
+    p14 = [u, 0, 2 * u]
+    p15 = [2 * u, 0, 2 * u]
+    p16 = [3 * u, 0, 2 * u]
+    p17 = [0, u, 2 * u]
+    p18 = [u, u, 2 * u]
+    p19 = [2 * u, u, 2 * u]
+    p20 = [3 * u, u, 2 * u]
 
     # p21 = [u+u/3, u/3, u]
     # p22 = [2*u-u/3, u/3, u]
@@ -255,6 +486,7 @@ def example_predefined_points(state: State):
     state.rect(*p6, *p11, *p7)
     state.rect(*p1, *p8, *p4)
 
+
 def example_boxy_s(state: State):
     side = 2
     state.box(0, 0, 0, side)
@@ -267,9 +499,15 @@ def example_boxy_s(state: State):
     state.box(side * 4, 0, side * 4, side)
     state.box(side * 4, 0, side * 3, side)
     state.rect(
-        side * 4, 0, side*3,
-        side * 4, 0, 0,
-        side * 7, 0, 0,
+        side * 4,
+        0,
+        side * 3,
+        side * 4,
+        0,
+        0,
+        side * 7,
+        0,
+        0,
     )
 
 
