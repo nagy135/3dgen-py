@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import List, Set
-import sys
 import argparse
 from pyrender import start
+
 
 class Point:
     x: int
@@ -78,8 +78,12 @@ class State:
                     filter(lambda x: x.index in face2.point_indexes, self.points)
                 )
 
-                first = [point.x + point.y * 1000 + point.z * 1000000 for point in points]
-                second = [point.x + point.y * 1000 + point.z * 1000000 for point in points2]
+                first = [
+                    point.x + point.y * 1000 + point.z * 1000000 for point in points
+                ]
+                second = [
+                    point.x + point.y * 1000 + point.z * 1000000 for point in points2
+                ]
 
                 if set(first) == set(second):
                     duplicate_face_indexes.add(k)
@@ -91,9 +95,7 @@ class State:
                 new_faces.append(self.faces[index])
         self.faces = new_faces
 
-    def box(
-        self, x: int, y: int, z: int, side: int
-    ) -> State:
+    def box(self, x: int, y: int, z: int, side: int) -> State:
         coordinates = [
             [x, y, z],
             [x + side, y, z],
@@ -120,17 +122,27 @@ class State:
 
         return self
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Generates obj files from code')
+    parser = argparse.ArgumentParser(description="Generates obj files from code")
 
-    parser.add_argument('filename', metavar='filename', type=str,
-                        help='file to output .obj to')
+    parser.add_argument(
+        "filename", metavar="filename", type=str, help="file to output .obj to"
+    )
 
-    parser.add_argument('--preview', '-p', dest='preview_mode', action='store_const',
-                        const=True, default=False,
-                        help='preview after generate')
-
+    parser.add_argument(
+        "--preview",
+        "-p",
+        dest="preview_mode",
+        action="store_const",
+        const=True,
+        default=False,
+        help="preview after generate",
+    )
     args = parser.parse_args()
+
+    if args.preview_mode:
+        print("OPEN PREVIEW")
 
     state = State()
     side = 20
@@ -154,6 +166,7 @@ def main():
 
     if args.preview_mode:
         start(args.filename)
+
 
 if __name__ == "__main__":
     main()
