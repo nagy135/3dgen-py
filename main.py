@@ -56,6 +56,10 @@ class State:
         self.faces = []
         self.obj_str = "mtllib master.mtl\n\n"
 
+    def write_obj_str(self):
+        self.obj_str += points_str(self.points)
+        self.obj_str += faces_str(self.faces)
+
     def remove_duplicate_faces(self):
         duplicate_face_indexes: Set[int] = set()
         for j in range(len(self.faces)):
@@ -75,12 +79,15 @@ class State:
 
                 if set(first) == set(second):
                     duplicate_face_indexes.add(k)
+                    duplicate_face_indexes.add(j)
 
         print("dupl", duplicate_face_indexes)
         new_faces = []
         for index in range(len(self.faces)):
             if index not in duplicate_face_indexes:
                 new_faces.append(self.faces[index])
+            else:
+                print('skipping', self.faces[index])
         self.faces = new_faces
 
     def box(
@@ -110,18 +117,17 @@ class State:
         self.points += points
         self.faces += faces
 
-        self.obj_str += points_str(points)
-        self.obj_str += faces_str(faces)
-
         return self
 
 def main():
 
     state = State()
     side = 20
+    # state.box(0, 0, 0, side)
+    # state.box(side, 0, 0, side)
     x_offset = 0
     z_offset = 0
-    for _ in range(1, 7):
+    for _ in range(1, 3):
         state.box(x_offset, 0, z_offset, side)
         x_offset += side
         state.box(x_offset, 0, z_offset, side)
@@ -130,6 +136,7 @@ def main():
         z_offset += side
 
     state.remove_duplicate_faces()
+    state.write_obj_str()
 
     with open(sys.argv[1], "w") as f:
         f.write(state.obj_str)
