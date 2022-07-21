@@ -96,15 +96,18 @@ class State:
         self.faces = new_faces
 
     def box(self, x: int, y: int, z: int, side: int) -> State:
+        return self.rect(x, y, z, side, side, side)
+
+    def rect(self, x: int, y: int, z: int, w_x: int, w_y: int, w_z: int) -> State:
         coordinates = [
             [x, y, z],
-            [x + side, y, z],
-            [x, y + side, z],
-            [x + side, y + side, z],
-            [x, y, z + side],
-            [x + side, y, z + side],
-            [x, y + side, z + side],
-            [x + side, y + side, z + side],
+            [x + w_x, y, z],
+            [x, y + w_y, z],
+            [x + w_x, y + w_y, z],
+            [x, y, z + w_z],
+            [x + w_x, y, z + w_z],
+            [x, y + w_y, z + w_z],
+            [x + w_x, y + w_y, z + w_z],
         ]
 
         points = [Point(x=j[0], y=j[1], z=j[2]) for j in coordinates]
@@ -157,23 +160,18 @@ def main():
     if args.preview_mode:
         start(args.filename)
 
-def generate_logic(state: State):
-    side = 20
-    # state.box(0, 0, 0, side)
-    # state.box(side, 0, 0, side)
-    x_offset = 0
-    z_offset = 0
-    y_offset = 0
-    for _ in range(1, 5):
-        state.box(x_offset, y_offset, z_offset, side)
-        x_offset += side
-        state.box(x_offset, y_offset, z_offset, side)
-        z_offset += side
-        state.box(x_offset, y_offset, z_offset, side)
-        z_offset += side
-        state.box(x_offset, y_offset, z_offset, side)
-        y_offset += side
 
+def generate_logic(state: State):
+    side = 10
+    state.box(0, 0, 0, side)
+    state.box(0, 0, side, side)
+    state.box(side, 0, 0, side)
+    state.box(side*2, 0, 0, side)
+    state.rect(side*2, 0, side, side, side, side*3)
+    state.box(side*2, 0, side*4, side)
+    state.box(side*3, 0, side*4, side)
+    state.box(side*4, 0, side*4, side)
+    state.box(side*4, 0, side*3, side)
 
 
 if __name__ == "__main__":
