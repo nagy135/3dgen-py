@@ -231,14 +231,14 @@ def drawFrame():
 def key_callback(window, key, scancode, action, mods):
     global gCamAng, gCamHeight, modeFlag, distanceFromOrigin
     if action == glfw.PRESS or action == glfw.REPEAT:
-        if key == glfw.KEY_1:
+        if key == glfw.KEY_H:
             gCamAng += np.radians(-2 % 360)
-        elif key == glfw.KEY_3:
+        elif key == glfw.KEY_L:
             gCamAng += np.radians(2 % 360)
-        elif key == glfw.KEY_2:
+        elif key == glfw.KEY_K:
             if gCamHeight < 9:
                 gCamHeight += 0.1
-        elif key == glfw.KEY_W:
+        elif key == glfw.KEY_J:
             if gCamHeight > -9:
                 gCamHeight += -0.1
         elif key == glfw.KEY_Z:
@@ -251,7 +251,7 @@ def key_callback(window, key, scancode, action, mods):
         elif key == glfw.KEY_A:
             if distanceFromOrigin > 0:
                 distanceFromOrigin -= 1
-        elif key == glfw.KEY_S:
+        elif key == glfw.KEY_D:
             if distanceFromOrigin < 180:
                 distanceFromOrigin += 1
         elif key == glfw.KEY_V:
