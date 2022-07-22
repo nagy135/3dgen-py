@@ -61,8 +61,42 @@ class State:
         self.obj_str = "mtllib master.mtl\n\n"
 
     def write_obj_str(self):
+        print(f"point: {len(self.points)}, faces: {len(self.faces)}")
         self.obj_str += points_str(self.points)
         self.obj_str += faces_str(self.faces)
+
+    def remove_duplicate_points(self):
+        duplicate_point_indexes: Set[int] = set()
+        for j in range(len(self.points)):
+            if j in duplicate_point_indexes:
+                continue
+            first_point = self.points[j]
+            first = first_point.x + first_point.y * 1000 + first_point.z * 1000000
+
+            for k in range(j + 1, len(self.points)):
+                if k in duplicate_point_indexes:
+                    continue
+                second_point = self.points[k]
+                second = (
+                    second_point.x + second_point.y * 1000 + second_point.z * 1000000
+                )
+
+                if first == second:
+                    duplicate_point_indexes.add(second_point.index)
+                    for face in self.faces:
+                        if second_point.index in face.point_indexes:
+                            index_index = face.point_indexes.index(second_point.index)
+                            print("on pos", index_index)
+                            print("face", face.point_indexes)
+                            print("from", second_point.index)
+                            print("to", first_point.index)
+                            face.point_indexes[index_index] = first_point.index
+                            print("after face", face.point_indexes)
+
+        # print('before', len(self.points))
+        # new_points = [p for p in self.points if p.index not in duplicate_point_indexes]
+        # print('after', len(new_points))
+        # self.points = new_points
 
     def remove_duplicate_faces(self):
         duplicate_face_indexes: Set[int] = set()
@@ -148,204 +182,396 @@ class State:
         elif g_x is None:
             if g_y is not None and g_z is not None:
                 faces = [Face(x) for x in [top, bottom, front, back]]
-                for x_offset in [x, x+w_x]:
+                for x_offset in [x, x + w_x]:
                     self.rect(
-                        x_offset, y, z,
-                        x_offset, y+g_y, z + g_z,
-                        x_offset, y+g_y, z
+                        x_offset, y, z, x_offset, y + g_y, z + g_z, x_offset, y + g_y, z
                     )
                     self.rect(
-                        x_offset, y, z+g_z,
-                        x_offset, y+g_y, z+w_z-g_z,
-                        x_offset, y+g_y, z+g_z
+                        x_offset,
+                        y,
+                        z + g_z,
+                        x_offset,
+                        y + g_y,
+                        z + w_z - g_z,
+                        x_offset,
+                        y + g_y,
+                        z + g_z,
                     )
                     self.rect(
-                        x_offset, y, z+w_z-g_z,
-                        x_offset, y+g_y, z+w_z,
-                        x_offset, y+g_y, z+w_z-g_z,
-                    )
-
-                    self.rect(
-                        x_offset, y+w_y-g_y, z,
-                        x_offset, y+w_y, z+ g_z,
-                        x_offset, y+w_y, z
-                    )
-                    self.rect(
-                        x_offset, y+w_y-g_y, z+g_z,
-                        x_offset, y+w_y, z+w_z-g_z,
-                        x_offset, y+w_y, z+g_z
-                    )
-                    self.rect(
-                        x_offset, y+w_y-g_y, z+w_z-g_z,
-                        x_offset, y+w_y, z+w_z,
-                        x_offset, y+w_y, z+w_z-g_z,
+                        x_offset,
+                        y,
+                        z + w_z - g_z,
+                        x_offset,
+                        y + g_y,
+                        z + w_z,
+                        x_offset,
+                        y + g_y,
+                        z + w_z - g_z,
                     )
 
                     self.rect(
-                        x_offset, y+g_y, z,
-                        x_offset, y+w_y-g_y, z+g_z,
-                        x_offset, y+w_y-g_y, z
+                        x_offset,
+                        y + w_y - g_y,
+                        z,
+                        x_offset,
+                        y + w_y,
+                        z + g_z,
+                        x_offset,
+                        y + w_y,
+                        z,
                     )
                     self.rect(
-                        x_offset, y+g_y, z+w_z-g_z,
-                        x_offset, y+w_y-g_y, z+w_z,
-                        x_offset, y+w_y-g_y, z+w_z-g_z
+                        x_offset,
+                        y + w_y - g_y,
+                        z + g_z,
+                        x_offset,
+                        y + w_y,
+                        z + w_z - g_z,
+                        x_offset,
+                        y + w_y,
+                        z + g_z,
+                    )
+                    self.rect(
+                        x_offset,
+                        y + w_y - g_y,
+                        z + w_z - g_z,
+                        x_offset,
+                        y + w_y,
+                        z + w_z,
+                        x_offset,
+                        y + w_y,
+                        z + w_z - g_z,
+                    )
+
+                    self.rect(
+                        x_offset,
+                        y + g_y,
+                        z,
+                        x_offset,
+                        y + w_y - g_y,
+                        z + g_z,
+                        x_offset,
+                        y + w_y - g_y,
+                        z,
+                    )
+                    self.rect(
+                        x_offset,
+                        y + g_y,
+                        z + w_z - g_z,
+                        x_offset,
+                        y + w_y - g_y,
+                        z + w_z,
+                        x_offset,
+                        y + w_y - g_y,
+                        z + w_z - g_z,
                     )
                 self.rect(
-                    x, y+g_y, z+g_z,
-                    x+w_x, y+w_y-g_y, z+g_z,
-                    x+w_x, y+g_y, z+g_z
+                    x,
+                    y + g_y,
+                    z + g_z,
+                    x + w_x,
+                    y + w_y - g_y,
+                    z + g_z,
+                    x,
+                    y + w_y - g_y,
+                    z + g_z,
                 )
                 self.rect(
-                    x, y+g_y, z+w_z-g_z,
-                    x+w_x, y+w_y-g_y, z+w_z-g_z,
-                    x+w_x, y+g_y, z+w_z-g_z
+                    x,
+                    y + g_y,
+                    z + w_z - g_z,
+                    x + w_x,
+                    y + w_y - g_y,
+                    z + w_z - g_z,
+                    x,
+                    y + w_y - g_y,
+                    z + w_z - g_z,
                 )
 
                 self.rect(
-                    x, y+g_y, z+g_z,
-                    x+w_x, y+g_y, z+w_z-g_z,
-                    x+w_x, y+g_y, z+g_z
+                    x,
+                    y + g_y,
+                    z + g_z,
+                    x + w_x,
+                    y + g_y,
+                    z + w_z - g_z,
+                    x + w_x,
+                    y + g_y,
+                    z + g_z,
                 )
                 self.rect(
-                    x, y+w_y-g_y, z+g_z,
-                    x+w_x, y+w_y-g_y, z+w_z-g_z,
-                    x+w_x, y+w_y-g_y, z+g_z
+                    x,
+                    y + w_y - g_y,
+                    z + g_z,
+                    x + w_x,
+                    y + w_y - g_y,
+                    z + w_z - g_z,
+                    x + w_x,
+                    y + w_y - g_y,
+                    z + g_z,
                 )
 
         elif g_y is None:
             faces = [Face(x) for x in [top, bottom, left, right]]
             if g_x is not None and g_z is not None:
-                for y_offset in [y, y+w_y]:
+                for y_offset in [y, y + w_y]:
                     self.rect(
-                        x, y_offset, z,
-                        x + g_x, y_offset, z + g_z,
-                        x + g_x, y_offset, z
+                        x, y_offset, z, x + g_x, y_offset, z + g_z, x + g_x, y_offset, z
                     )
                     self.rect(
-                        x, y_offset, z+g_z,
-                        x+g_x, y_offset, z+w_z-g_z,
-                        x+g_x, y_offset, z+g_z
+                        x,
+                        y_offset,
+                        z + g_z,
+                        x + g_x,
+                        y_offset,
+                        z + w_z - g_z,
+                        x + g_x,
+                        y_offset,
+                        z + g_z,
                     )
                     self.rect(
-                        x, y_offset, z+w_z-g_z,
-                        x+g_x, y_offset, z+w_z,
-                        x+g_x, y_offset, z+w_z-g_z,
-                    )
-
-                    self.rect(
-                        x+w_x-g_x, y_offset, z,
-                        x+w_x, y_offset, z + g_z,
-                        x+w_x, y_offset, z
-                    )
-                    self.rect(
-                        x+w_x-g_x, y_offset, z+g_z,
-                        x+w_x, y_offset, z+w_z-g_z,
-                        x+w_x, y_offset, z+g_z
-                    )
-                    self.rect(
-                        x+w_x-g_x, y_offset, z+w_z-g_z,
-                        x+w_x, y_offset, z+w_z,
-                        x+w_x, y_offset, z+w_z-g_z,
+                        x,
+                        y_offset,
+                        z + w_z - g_z,
+                        x + g_x,
+                        y_offset,
+                        z + w_z,
+                        x + g_x,
+                        y_offset,
+                        z + w_z - g_z,
                     )
 
                     self.rect(
-                        x+g_x, y_offset, z,
-                        x+w_x-g_x, y_offset, z+g_z,
-                        x+w_x-g_x, y_offset, z
+                        x + w_x - g_x,
+                        y_offset,
+                        z,
+                        x + w_x,
+                        y_offset,
+                        z + g_z,
+                        x + w_x,
+                        y_offset,
+                        z,
                     )
                     self.rect(
-                        x+g_x, y_offset, z+w_z-g_z,
-                        x+w_x-g_x, y_offset, z+w_z,
-                        x+w_x-g_x, y_offset, z+w_z-g_z
+                        x + w_x - g_x,
+                        y_offset,
+                        z + g_z,
+                        x + w_x,
+                        y_offset,
+                        z + w_z - g_z,
+                        x + w_x,
+                        y_offset,
+                        z + g_z,
+                    )
+                    self.rect(
+                        x + w_x - g_x,
+                        y_offset,
+                        z + w_z - g_z,
+                        x + w_x,
+                        y_offset,
+                        z + w_z,
+                        x + w_x,
+                        y_offset,
+                        z + w_z - g_z,
+                    )
+
+                    self.rect(
+                        x + g_x,
+                        y_offset,
+                        z,
+                        x + w_x - g_x,
+                        y_offset,
+                        z + g_z,
+                        x + w_x - g_x,
+                        y_offset,
+                        z,
+                    )
+                    self.rect(
+                        x + g_x,
+                        y_offset,
+                        z + w_z - g_z,
+                        x + w_x - g_x,
+                        y_offset,
+                        z + w_z,
+                        x + w_x - g_x,
+                        y_offset,
+                        z + w_z - g_z,
                     )
                 self.rect(
-                    x+g_x, y, z+g_z,
-                    x+w_x-g_x, y+w_y, z+g_z,
-                    x+g_x, y+w_y, z+g_z
+                    x + g_x,
+                    y,
+                    z + g_z,
+                    x + w_x - g_x,
+                    y + w_y,
+                    z + g_z,
+                    x + g_x,
+                    y + w_y,
+                    z + g_z,
                 )
                 self.rect(
-                    x+g_x, y, z+w_z-g_z,
-                    x+w_x-g_x, y+w_y, z+w_z-g_z,
-                    x+g_x, y+w_y, z+w_z-g_z
+                    x + g_x,
+                    y,
+                    z + w_z - g_z,
+                    x + w_x - g_x,
+                    y + w_y,
+                    z + w_z - g_z,
+                    x + g_x,
+                    y + w_y,
+                    z + w_z - g_z,
                 )
 
                 self.rect(
-                    x+g_x, y, z+g_z,
-                    x+g_x, y+w_y, z+w_z-g_z,
-                    x+g_x, y+w_y, z+g_z
+                    x + g_x,
+                    y,
+                    z + g_z,
+                    x + g_x,
+                    y + w_y,
+                    z + w_z - g_z,
+                    x + g_x,
+                    y + w_y,
+                    z + g_z,
                 )
                 self.rect(
-                    x+w_x-g_x, y, z+g_z,
-                    x+w_x-g_x, y+w_y, z+w_z-g_z,
-                    x+w_x-g_x, y+w_y, z+g_z
+                    x + w_x - g_x,
+                    y,
+                    z + g_z,
+                    x + w_x - g_x,
+                    y + w_y,
+                    z + w_z - g_z,
+                    x + w_x - g_x,
+                    y + w_y,
+                    z + g_z,
                 )
         elif g_z is None:
             faces = [Face(x) for x in [front, back, left, right]]
             if g_x is not None and g_y is not None:
-                for z_offset in [z, z+w_z]:
+                for z_offset in [z, z + w_z]:
                     self.rect(
-                        x, y, z_offset,
-                        x + g_x, y + g_y, z_offset,
-                        x + g_x, y, z_offset
+                        x, y, z_offset, x + g_x, y + g_y, z_offset, x, y + g_y, z_offset
                     )
                     self.rect(
-                        x, y+g_y, z_offset,
-                        x+g_x, y+w_y-g_y, z_offset,
-                        x+g_x, y+g_y, z_offset
+                        x,
+                        y + g_y,
+                        z_offset,
+                        x + g_x,
+                        y + w_y - g_y,
+                        z_offset,
+                        x,
+                        y + w_y - g_y,
+                        z_offset,
                     )
                     self.rect(
-                        x, y+w_y-g_y, z_offset,
-                        x+g_x, y+w_y, z_offset,
-                        x+g_x, y+w_y-g_y, z_offset,
-                    )
-
-                    self.rect(
-                        x+w_x-g_x, y, z_offset,
-                        x+w_x, y+g_y, z_offset,
-                        x+w_x, y, z_offset
-                    )
-                    self.rect(
-                        x+w_x-g_x, y+g_y, z_offset,
-                        x+w_x, y+w_y-g_y, z_offset,
-                        x+w_x, y+g_y, z_offset
-                    )
-                    self.rect(
-                        x+w_x-g_x, y+w_y-g_y, z_offset,
-                        x+w_x, y+w_y, z_offset,
-                        x+w_x, y+w_y-g_y, z_offset,
+                        x,
+                        y + w_y - g_y,
+                        z_offset,
+                        x + g_x,
+                        y + w_y,
+                        z_offset,
+                        x,
+                        y + w_y,
+                        z_offset,
                     )
 
                     self.rect(
-                        x+g_x, y, z_offset,
-                        x+w_x-g_x, y+g_y, z_offset,
-                        x+w_x-g_x, y, z_offset
+                        x + w_x - g_x,
+                        y,
+                        z_offset,
+                        x + w_x,
+                        y + g_y,
+                        z_offset,
+                        x + w_x - g_x,
+                        y + g_y,
+                        z_offset,
                     )
                     self.rect(
-                        x+g_x, y+w_y-g_y, z_offset,
-                        x+w_x-g_x, y+w_y, z_offset,
-                        x+w_x-g_x, y+w_y-g_y, z_offset
+                        x + w_x - g_x,
+                        y + g_y,
+                        z_offset,
+                        x + w_x,
+                        y + w_y - g_y,
+                        z_offset,
+                        x + w_x - g_x,
+                        y + w_y - g_y,
+                        z_offset,
+                    )
+                    self.rect(
+                        x + w_x - g_x,
+                        y + w_y - g_y,
+                        z_offset,
+                        x + w_x,
+                        y + w_y,
+                        z_offset,
+                        x + w_x - g_x,
+                        y + w_y,
+                        z_offset,
+                    )
+
+                    self.rect(
+                        x + g_x,
+                        y,
+                        z_offset,
+                        x + w_x - g_x,
+                        y + g_y,
+                        z_offset,
+                        x + g_x,
+                        y + g_y,
+                        z_offset,
+                    )
+                    self.rect(
+                        x + g_x,
+                        y + w_y - g_y,
+                        z_offset,
+                        x + w_x - g_x,
+                        y + w_y,
+                        z_offset,
+                        x + g_x,
+                        y + w_y,
+                        z_offset,
                     )
                 self.rect(
-                    x+g_x, y+g_y, z,
-                    x+w_x-g_x, y+g_y, z+w_z,
-                    x+g_x, y+g_y, z+w_z
+                    x + g_x,
+                    y + g_y,
+                    z,
+                    x + w_x - g_x,
+                    y + g_y,
+                    z + w_z,
+                    x + g_x,
+                    y + g_y,
+                    z + w_z,
                 )
                 self.rect(
-                    x+g_x, y+w_y-g_y, z,
-                    x+w_x-g_x, y+w_y-g_y, z+w_z,
-                    x+g_x, y+w_y-g_y, z+w_z
+                    x + g_x,
+                    y + w_y - g_y,
+                    z,
+                    x + w_x - g_x,
+                    y + w_y - g_y,
+                    z + w_z,
+                    x + g_x,
+                    y + w_y - g_y,
+                    z + w_z,
                 )
 
                 self.rect(
-                    x+g_x, y+g_y, z,
-                    x+g_x, y+w_y-g_y, z+w_z,
-                    x+g_x, y+g_y, z+w_z
+                    x + g_x,
+                    y + g_y,
+                    z,
+                    x + g_x,
+                    y + w_y - g_y,
+                    z + w_z,
+                    x + g_x,
+                    y + g_y,
+                    z + w_z,
                 )
                 self.rect(
-                    x+w_x-g_x, y+g_y, z,
-                    x+w_x-g_x, y+w_y-g_y, z+w_z,
-                    x+w_x-g_x, y+g_y, z+w_z
+                    x + w_x - g_x,
+                    y + g_y,
+                    z,
+                    x + w_x - g_x,
+                    y + w_y - g_y,
+                    z + w_z,
+                    x + w_x - g_x,
+                    y + g_y,
+                    z + w_z,
                 )
 
         self.faces += faces
@@ -418,6 +644,7 @@ def main():
     generate_logic(state)
 
     state.remove_duplicate_faces()
+    state.remove_duplicate_points()
     state.write_obj_str()
 
     with open(args.filename, "w") as f:
@@ -432,11 +659,45 @@ def generate_logic(state: State):
 
 
 def example_gap(state: State):
+    gap = 5
+    u = 50
+    state.box(0,0,0,u)
+    state.box(0,0,u,u)
+    state.cuboid(u, 0, u, u, u, u, gap, gap, None)
+
+
+def example_gap_cup(state: State):
     u = 50
     gap = 5
-    state.box(0,0, 0, u)
-    state.box(0,0, u, u)
-    state.cuboid(0, 0, 2*u, u, u, u, None, gap, gap*2)
+    base = 40
+    handle = 8
+    handle_depth = 10
+
+    # base
+    state.cuboid(0, 0, 0, u, u, base)
+
+    # body
+    state.cuboid(0, 0, base, u, u, u, gap, gap, None)
+
+    # handle {{{
+    # from cup
+    state.cuboid(u, u // 2 - handle, base + u // 4, handle_depth, handle, handle)
+    state.cuboid(u, u // 2 - handle, base + u - u // 4, handle_depth, handle, handle)
+    #
+    # # boxes
+    state.box(u + handle_depth, u // 2 - handle, base + u - u // 4, handle)
+    state.box(u + handle_depth, u // 2 - handle, base + u // 4, handle)
+    #
+    # # join part
+    state.cuboid(
+        u + handle_depth + handle,
+        u // 2 - handle,
+        base + u // 4,
+        handle,
+        handle,
+        u // 2 + handle,
+    )
+    # }}}
 
 
 def example_predefined_points(state: State):
