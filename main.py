@@ -114,9 +114,9 @@ class State:
             raise Exception(
                 "Gap on one axis needs to be None (so that gap leads outside)"
             )
-        assert (
-            len(list(filter(lambda x: x is not None, [g_x, g_y, g_z]))) == 2
-        ), "Expected 2 gap params"
+        # assert (
+        #     len(list(filter(lambda x: x is not None, [g_x, g_y, g_z]))) == 2
+        # ), "Expected 2 gap params"
 
         coordinates = [
             [x, y, z],
@@ -143,7 +143,9 @@ class State:
 
         faces: List[Face] = []
 
-        if g_x is None:
+        if g_x is None and g_y is None and g_z is None:
+            faces = [Face(x) for x in [front, back, left, right, top, bottom]]
+        elif g_x is None:
             if g_y is not None and g_z is not None:
                 faces = [Face(x) for x in [top, bottom, front, back]]
                 for x_offset in [x, x+w_x]:
@@ -211,7 +213,7 @@ class State:
                     x+w_x, y+w_y-g_y, z+g_z
                 )
 
-        if g_y is None:
+        elif g_y is None:
             faces = [Face(x) for x in [top, bottom, left, right]]
             if g_x is not None and g_z is not None:
                 for y_offset in [y, y+w_y]:
@@ -278,7 +280,7 @@ class State:
                     x+w_x-g_x, y+w_y, z+w_z-g_z,
                     x+w_x-g_x, y+w_y, z+g_z
                 )
-        if g_z is None:
+        elif g_z is None:
             faces = [Face(x) for x in [front, back, left, right]]
             if g_x is not None and g_y is not None:
                 for z_offset in [z, z+w_z]:
@@ -432,7 +434,9 @@ def generate_logic(state: State):
 def example_gap(state: State):
     u = 50
     gap = 5
-    state.cuboid(0, 0, 0, u, u, u, gap, gap, None)
+    state.box(0,0, 0, u)
+    state.box(0,0, u, u)
+    state.cuboid(0, 0, 2*u, u, u, u, None, gap, gap*2)
 
 
 def example_predefined_points(state: State):
