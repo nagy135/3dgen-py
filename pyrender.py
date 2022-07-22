@@ -311,4 +311,4 @@ def framebuffer_size_callback(window, width, height):
 
 
 if __name__ == "__main__":
-    start('brick.obj')
+    start(sys.argv[1])
