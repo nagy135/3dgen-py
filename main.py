@@ -40,7 +40,7 @@ def main():
 
 
 def generate_logic(state: State):
-    example_face(state)
+    example_box(state)
 
 
 if __name__ == "__main__":
