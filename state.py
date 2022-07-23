@@ -5,6 +5,12 @@ from textwrap import indent
 
 INDENT_TAB = " " * 4
 
+FRONT=(0, -1, 0)
+BACK=(0, 1, 0)
+TOP=(0, 0, 1)
+BOTTOM=(0, 0, -1)
+LEFT=(-1, 0, 0)
+RIGHT=(1, 0, 0)
 
 class Point:
     x: int
@@ -88,6 +94,42 @@ class State:
             raise Exception(
                 "Gap on one axis needs to be None (so that gap leads outside)"
             )
+        self.rect(
+            x, y, z,
+            x+w_x, y, z+w_z,
+            x, y, z+w_z,
+            *FRONT
+        )
+        self.rect(
+            x, y+w_y, z,
+            x+w_x, y+w_y, z+w_z,
+            x, y+w_y, z+w_z,
+            *BACK
+        )
+        self.rect(
+            x, y, z,
+            x, y+w_y, z+w_z,
+            x, y, z+w_z,
+            *LEFT
+        )
+        self.rect(
+            x+w_x, y, z,
+            x+w_x, y+w_y, z+w_z,
+            x+w_x, y+w_y, z,
+            *RIGHT
+        )
+        self.rect(
+            x, y, z+w_z,
+            x+w_x, y+w_y, z+w_z,
+            x, y+w_y, z+w_z,
+            *TOP
+        )
+        self.rect(
+            x, y+w_y, z,
+            x+w_x, y, z,
+            x, y, z,
+            *BOTTOM
+        )
         return self
 
     def rect(
@@ -109,20 +151,19 @@ class State:
         Creates rectangular face between given 3 corners, calculating 4th one
         First 2 points must cross diagonally
         """
-        mid_point = [(x + x2) / 2, (y + y2) / 2, (z + z2) / 2]
-        coordinates = [
-            [x, y, z],
-            [
-                mid_point[0] - (x3 - mid_point[0]),
-                mid_point[1] - (y3 - mid_point[1]),
-                mid_point[2] - (z3 - mid_point[2]),
-            ],
-            [x2, y2, z2],
-            [x3, y3, z3],
+        mid_point = [(x + x2) // 2, (y + y2) // 2, (z + z2) // 2]
+        p1 = Point(x, y, z)
+        p2 = Point(x2, y2, z2)
+        p3 = Point(x3, y3, z3)
+        p4 = Point(
+            mid_point[0] - (x3 - mid_point[0]),
+            mid_point[1] - (y3 - mid_point[1]),
+            mid_point[2] - (z3 - mid_point[2]),
+        )
+
+        self.faces += [
+            Face([p1, p4, p2], normal=Point(nx, ny, nz)),
+            Face([p1, p2, p3], normal=Point(nx, ny, nz)),
         ]
-
-        points = [Point(x=j[0], y=j[1], z=j[2]) for j in coordinates]
-
-        self.faces += [Face(points, normal=Point(nx, ny, nz))]
 
         return self
