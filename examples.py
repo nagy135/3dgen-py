@@ -7,6 +7,15 @@ def example_gap(state: State):
     state.box(0,0,u,u)
     state.cuboid(u, 0, u, u, u, u, gap, gap, None)
 
+def example_face(state: State):
+    u = 50
+    state.rect(
+        0, 0, 0,
+        u, 0, u,
+        u, 0, 0,
+        0, -1, 0
+    )
+
 
 def example_gap_cup(state: State):
     u = 50
