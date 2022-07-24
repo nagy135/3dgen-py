@@ -26,6 +26,14 @@ def example_box(state: State):
         u, 0, 0,
         u
     )
+    state.box(
+        u*2, 0, 0,
+        u
+    )
+    state.box(
+        u, 0, u,
+        u
+    )
 
 
 
