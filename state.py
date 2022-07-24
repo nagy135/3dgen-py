@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Set, Tuple
 from textwrap import indent
 
 INDENT_TAB = " " * 4
@@ -33,26 +33,53 @@ class Point:
     def __str__(self):
         return point_str(self)
 
+class Wall:
+    faces: List[Face]
+    disabled: bool
+
+    def __init__(self, faces):
+        self.faces = faces
+        self.disabled = False
+
+    def __repr__(self):
+        return f"#{self.faces}"
+
+    def disable(self):
+        self.disabled = True
+        for face in self.faces:
+            face.disabled = True
+
+    def get_point_set(self) -> Set[Tuple[int]]:
+        s = set()
+        for face in self.faces:
+            for point in face.points:
+                s.add((point.x, point.y, point.z))
+        return s
+
 
 class Face:
     points: List[Point]
     normal: Point
+    disabled: bool
 
     def __init__(self, points: List[Point], normal: Point):
         self.points = points
         self.normal = normal
+        self.disabled = False
 
     def __repr__(self):
-        return f"({self.normal}) {self.points}"
+        return f"{self.points} ({self.normal})"
 
 
 def point_str(point: Point) -> str:
-    return f"{point.x:.5f} {point.y:.5f} {point.z:.5f}\n"
+    return f"{point.x:.1f} {point.y:.1f} {point.z:.1f}\n"
 
 
 def faces_str(faces: List[Face]) -> str:
     result = ""
     for face in faces:
+        if face.disabled:
+            continue
         result += f"facet normal {face.normal}"
         for point in face.points:
             result += indent(f"vertex {point}", INDENT_TAB)
@@ -62,18 +89,32 @@ def faces_str(faces: List[Face]) -> str:
 
 class State:
     faces: List[Face]
+    walls: List[Wall]
     stl_str: str
     name: str
 
     def __init__(self, name="test"):
         self.faces = []
+        self.walls = []
         self.stl_str = ""
         self.name = name
 
     def update_str_state(self):
+        self.prune_duplicate_walls()
         self.stl_str = f"solid {self.name}\n"
         self.stl_str += indent(faces_str(self.faces), INDENT_TAB)
         self.stl_str += "endsolid"
+
+    def prune_duplicate_walls(self):
+        print('before', len(self.walls))
+
+        for j in range(len(self.walls)):
+            for k in range(j+1, len(self.walls)):
+                if self.walls[j].get_point_set() == self.walls[k].get_point_set():
+                    self.walls[k].disable()
+                    self.walls[j].disable()
+
+        print('after', len([x for x in self.walls if not x.disabled]))
 
     def box(self, x: int, y: int, z: int, side: int) -> State:
         return self.cuboid(x, y, z, side, side, side)
@@ -98,37 +139,43 @@ class State:
             x, y, z,
             x+w_x, y, z+w_z,
             x, y, z+w_z,
-            *FRONT
+            *FRONT,
+            True
         )
         self.rect(
             x, y+w_y, z,
             x+w_x, y+w_y, z+w_z,
             x, y+w_y, z+w_z,
-            *BACK
+            *BACK,
+            True
         )
         self.rect(
             x, y, z,
             x, y+w_y, z+w_z,
             x, y, z+w_z,
-            *LEFT
+            *LEFT,
+            True
         )
         self.rect(
             x+w_x, y, z,
             x+w_x, y+w_y, z+w_z,
             x+w_x, y+w_y, z,
-            *RIGHT
+            *RIGHT,
+            True
         )
         self.rect(
             x, y, z+w_z,
             x+w_x, y+w_y, z+w_z,
             x, y+w_y, z+w_z,
-            *TOP
+            *TOP,
+            True
         )
         self.rect(
             x, y+w_y, z,
             x+w_x, y, z,
             x, y, z,
-            *BOTTOM
+            *BOTTOM,
+            True
         )
         return self
 
@@ -146,6 +193,7 @@ class State:
         nx: int,
         ny: int,
         nz: int,
+        create_wall = False
     ) -> State:
         """
         Creates rectangular face between given 3 corners, calculating 4th one
@@ -161,9 +209,14 @@ class State:
             mid_point[2] - (z3 - mid_point[2]),
         )
 
+        f1 = Face([p1, p4, p2], normal=Point(nx, ny, nz))
+        f2 = Face([p1, p2, p3], normal=Point(nx, ny, nz))
+
+        if create_wall:
+            self.walls.append(Wall([f1,f2]))
         self.faces += [
-            Face([p1, p4, p2], normal=Point(nx, ny, nz)),
-            Face([p1, p2, p3], normal=Point(nx, ny, nz)),
+            f1,
+            f2
         ]
 
         return self
