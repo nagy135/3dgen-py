@@ -13,14 +13,14 @@ LEFT=(-1, 0, 0)
 RIGHT=(1, 0, 0)
 
 class Point:
-    x: int
-    y: int
-    z: int
+    x: float
+    y: float
+    z: float
     index: int = 1
 
     used: int = 0
 
-    def __init__(self, x: int, y: int, z: int):
+    def __init__(self, x: float, y: float, z: float):
         self.x = x
         self.y = y
         self.z = z
@@ -49,7 +49,7 @@ class Wall:
         for face in self.faces:
             face.disabled = True
 
-    def get_point_set(self) -> Set[Tuple[int]]:
+    def get_point_set(self) -> Set[Tuple[float]]:
         s = set()
         for face in self.faces:
             for point in face.points:
@@ -81,8 +81,10 @@ def faces_str(faces: List[Face]) -> str:
         if face.disabled:
             continue
         result += f"facet normal {face.normal}"
+        result += indent("outer loop\n", INDENT_TAB)
         for point in face.points:
-            result += indent(f"vertex {point}", INDENT_TAB)
+            result += indent(f"vertex {point}", INDENT_TAB*2)
+        result += indent("endloop\n", INDENT_TAB)
         result += "endfacet\n"
     return result
 
@@ -116,20 +118,20 @@ class State:
 
         print('after', len([x for x in self.walls if not x.disabled]))
 
-    def box(self, x: int, y: int, z: int, side: int) -> State:
+    def box(self, x: float, y: float, z: float, side: float) -> State:
         return self.cuboid(x, y, z, side, side, side)
 
     def cuboid(
         self,
-        x: int,
-        y: int,
-        z: int,
-        w_x: int,
-        w_y: int,
-        w_z: int,
-        g_x: int | None = None,
-        g_y: int | None = None,
-        g_z: int | None = None,
+        x: float,
+        y: float,
+        z: float,
+        w_x: float,
+        w_y: float,
+        w_z: float,
+        g_x: float | None = None,
+        g_y: float | None = None,
+        g_z: float | None = None,
     ) -> State:
         if all(map(lambda x: x is not None, [g_x, g_y, g_z])):
             raise Exception(
@@ -181,25 +183,25 @@ class State:
 
     def rect(
         self,
-        x: int,
-        y: int,
-        z: int,
-        x2: int,
-        y2: int,
-        z2: int,
-        x3: int,
-        y3: int,
-        z3: int,
-        nx: int,
-        ny: int,
-        nz: int,
+        x: float,
+        y: float,
+        z: float,
+        x2: float,
+        y2: float,
+        z2: float,
+        x3: float,
+        y3: float,
+        z3: float,
+        nx: float,
+        ny: float,
+        nz: float,
         create_wall = False
     ) -> State:
         """
         Creates rectangular face between given 3 corners, calculating 4th one
         First 2 points must cross diagonally
         """
-        mid_point = [(x + x2) // 2, (y + y2) // 2, (z + z2) // 2]
+        mid_point = [(x + x2) / 2, (y + y2) / 2, (z + z2) / 2]
         p1 = Point(x, y, z)
         p2 = Point(x2, y2, z2)
         p3 = Point(x3, y3, z3)
