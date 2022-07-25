@@ -17,57 +17,65 @@ def example_face(state: State):
     )
 
 def example_box(state: State):
-    u = 10
-    state.box(
-        0, 0, 0,
-        u
-    )
-    state.box(
-        u, 0, 0,
-        u
-    )
-    state.box(
-        u*2, 0, 0,
-        u
-    )
-    state.box(
+    u = 60
+    # state.box(
+    #     0, 0, 0,
+    #     u
+    # )
+    # state.box(
+    #     0, 0, u,
+    #     u
+    # )
+    # state.box(
+    #     2*u, 0, 0,
+    #     u
+    # )
+    # state.box(
+    #     2*u, 0, u,
+    #     u
+    # )
+    state.box( 0, 0, 0, u)
+    state.box( 0, 0, u, u)
+    state.box( u*2, 0, 0, u)
+    state.box( u*2, 0, u, u)
+    state.cuboid(
         u, 0, u,
-        u
+        u,u,u,
+        10, 10, None
     )
+    # state.cuboid(
+    #     u*2, 0, u*2,
+    #     u,u,u,
+    #     None, 5, 5
+    # )
+    # state.cuboid(
+    #     0, 0, u*2,
+    #     u,u,u,
+    #     None, 5, 5
+    # )
 
 
 
 def example_gap_cup(state: State):
     u = 50
-    gap = 5
     base = 40
-    handle = 8
-    handle_depth = 10
+    handle = 10
+    handle_spread = 20
 
     # base
-    state.cuboid(0, 0, 0, u, u, base)
+    # state.cuboid(0, 0, 0, u, u, base)
 
     # body
-    state.cuboid(0, 0, base, u, u, u, gap, gap, None)
+    # state.cuboid(0, 0, base, u, u, u, gap, gap, None)
 
     # handle {{{
-    # from cup
-    state.cuboid(u, u // 2 - handle, base + u // 4, handle_depth, handle, handle)
-    state.cuboid(u, u // 2 - handle, base + u - u // 4, handle_depth, handle, handle)
-    #
     # # boxes
-    state.box(u + handle_depth, u // 2 - handle, base + u - u // 4, handle)
-    state.box(u + handle_depth, u // 2 - handle, base + u // 4, handle)
-    #
-    # # join part
-    state.cuboid(
-        u + handle_depth + handle,
-        u // 2 - handle,
-        base + u // 4,
-        handle,
-        handle,
-        u // 2 + handle,
-    )
+    state.box(u, u/2, u/2 - handle_spread/2, handle)
+    state.box(u, u/2, u/2 + handle_spread/2, handle)
+
+    state.box(u+handle, u/2, u/2 - handle_spread/2, handle)
+    state.box(u+handle, u/2, u/2 + handle_spread/2, handle)
+    state.box(u+handle, u/2, handle + u/2 - handle_spread/2, handle)
     # }}}
 
 
