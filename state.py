@@ -108,15 +108,11 @@ class State:
         self.stl_str += "endsolid"
 
     def prune_duplicate_walls(self):
-        print('before', len(self.walls))
-
         for j in range(len(self.walls)):
             for k in range(j+1, len(self.walls)):
                 if self.walls[j].get_point_set() == self.walls[k].get_point_set():
                     self.walls[k].disable()
                     self.walls[j].disable()
-
-        print('after', len([x for x in self.walls if not x.disabled]))
 
     def box(self, x: float, y: float, z: float, side: float) -> State:
         return self.cuboid(x, y, z, side, side, side)
@@ -184,7 +180,7 @@ class State:
             )
 
         if all(map(lambda x: x is None, [g_x, g_y, g_z])):
-            return
+            return self
 
         p1 = x,y,z
         p2 = x+w_x,y,z
