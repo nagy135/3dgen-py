@@ -137,48 +137,279 @@ class State:
             raise Exception(
                 "Gap on one axis needs to be None (so that gap leads outside)"
             )
-        self.rect(
-            x, y, z,
-            x+w_x, y, z+w_z,
-            x, y, z+w_z,
-            *FRONT,
-            True
-        )
-        self.rect(
-            x, y+w_y, z,
-            x+w_x, y+w_y, z+w_z,
-            x, y+w_y, z+w_z,
-            *BACK,
-            True
-        )
-        self.rect(
-            x, y, z,
-            x, y+w_y, z+w_z,
-            x, y, z+w_z,
-            *LEFT,
-            True
-        )
-        self.rect(
-            x+w_x, y, z,
-            x+w_x, y+w_y, z+w_z,
-            x+w_x, y+w_y, z,
-            *RIGHT,
-            True
-        )
-        self.rect(
-            x, y, z+w_z,
-            x+w_x, y+w_y, z+w_z,
-            x, y+w_y, z+w_z,
-            *TOP,
-            True
-        )
-        self.rect(
-            x, y+w_y, z,
-            x+w_x, y, z,
-            x, y, z,
-            *BOTTOM,
-            True
-        )
+        if not (g_x is not None and g_z is not None):
+            self.rect(
+                x, y, z,
+                x+w_x, y, z+w_z,
+                x, y, z+w_z,
+                *FRONT,
+                True
+            )
+            self.rect(
+                x, y+w_y, z,
+                x+w_x, y+w_y, z+w_z,
+                x, y+w_y, z+w_z,
+                *BACK,
+                True
+            )
+        if not (g_y is not None and g_z is not None):
+            self.rect(
+                x, y, z,
+                x, y+w_y, z+w_z,
+                x, y, z+w_z,
+                *LEFT,
+                True
+            )
+            self.rect(
+                x+w_x, y, z,
+                x+w_x, y+w_y, z+w_z,
+                x+w_x, y+w_y, z,
+                *RIGHT,
+                True
+            )
+        if not (g_y is not None and g_x is not None):
+            self.rect(
+                x, y, z+w_z,
+                x+w_x, y+w_y, z+w_z,
+                x, y+w_y, z+w_z,
+                *TOP,
+                True
+            )
+            self.rect(
+                x, y+w_y, z,
+                x+w_x, y, z,
+                x, y, z,
+                *BOTTOM,
+                True
+            )
+
+        if all(map(lambda x: x is None, [g_x, g_y, g_z])):
+            return
+
+        p1 = x,y,z
+        p2 = x+w_x,y,z
+        p3 = x,y+w_y,z
+        p4 = x+w_x,y+w_y,z
+        p5 = x,y,z+w_z
+        p6 = x+w_x,y,z+w_z
+        p7 = x,y+w_y,z+w_z
+        p8 = x+w_x,y+w_y,z+w_z
+
+        if g_z is None and g_x is not None and g_y is not None:
+            p9=x+g_x, y+g_y, z
+            p10=x+w_x-g_x, y+g_y, z
+            p11=x+g_x, y+w_y-g_y, z
+            p12=x+w_x-g_x, y+w_y-g_y, z
+            p13=x+g_x, y+g_y, z+w_z
+            p14=x+w_x-g_x, y+g_y, z+w_z
+            p15=x+g_x, y+w_y-g_y, z+w_z
+            p16=x+w_x-g_x, y+w_y-g_y, z+w_z
+
+            # BOTTOM
+            self.triangle(
+                *p11, *p12, *p3,
+                *BOTTOM
+            )
+            self.triangle(
+                *p3, *p12, *p4,
+                *BOTTOM
+            )
+            self.triangle(
+                *p4, *p12, *p10,
+                *BOTTOM
+            )
+            self.triangle(
+                *p4, *p10, *p2,
+                *BOTTOM
+            )
+            self.triangle(
+                *p2, *p10, *p9,
+                *BOTTOM
+            )
+            self.triangle(
+                *p2, *p9, *p1,
+                *BOTTOM
+            )
+            self.triangle(
+                *p1, *p9, *p11,
+                *BOTTOM
+            )
+            self.triangle(
+                *p1, *p11, *p3,
+                *BOTTOM
+            )
+
+            # TOP
+            self.triangle(
+                *p5, *p14, *p13,
+                *TOP
+            )
+            self.triangle(
+                *p5, *p6, *p14,
+                *TOP
+            )
+            self.triangle(
+                *p6, *p16, *p14,
+                *TOP
+            )
+            self.triangle(
+                *p6, *p8, *p16,
+                *TOP
+            )
+            self.triangle(
+                *p8, *p15, *p16,
+                *TOP
+            )
+            self.triangle(
+                *p8, *p7, *p15,
+                *TOP
+            )
+            self.triangle(
+                *p7, *p13, *p15,
+                *TOP
+            )
+            self.triangle(
+                *p7, *p5, *p13,
+                *TOP
+            )
+
+            # INNER
+            self.rect(
+                *p9, *p15, *p13,
+                *RIGHT
+            )
+            self.rect(
+                *p12, *p14, *p16,
+                *LEFT
+            )
+            self.rect(
+                *p11, *p16, *p15,
+                *FRONT
+            )
+            self.rect(
+                *p10, *p13, *p14,
+                *BACK
+            )
+
+        if g_x is None and g_y is not None and g_z is not None:
+            p9=x, y+g_y, z+g_z
+            p10=x, y+g_y, z+w_z-g_z
+            p11=x, y+w_y-g_y, z+g_z
+            p12=x, y+w_y-g_y, z+w_z-g_z
+            p13=x+w_x, y+g_y, z+g_z
+            p14=x+w_x, y+g_y, z+w_z-g_z
+            p15=x+w_x, y+w_y-g_y, z+g_z
+            p16=x+w_x, y+w_y-g_y, z+w_z-g_z
+
+            # LEFT
+            self.triangle(
+                *p3, *p9, *p11,
+                *LEFT
+            )
+            self.triangle(
+                *p3, *p1, *p9,
+                *LEFT
+            )
+            self.triangle(
+                *p1, *p10, *p9,
+                *LEFT
+            )
+            self.triangle(
+                *p1, *p5, *p10,
+                *LEFT
+            )
+            self.triangle(
+                *p5, *p12, *p10,
+                *LEFT
+            )
+            self.triangle(
+                *p5, *p7, *p12,
+                *LEFT
+            )
+            self.triangle(
+                *p7, *p11, *p12,
+                *LEFT
+            )
+            self.triangle(
+                *p7, *p3, *p11,
+                *LEFT
+            )
+
+            # RIGHT
+            self.triangle(
+                *p2, *p15, *p13,
+                *RIGHT
+            )
+            self.triangle(
+                *p2, *p4, *p15,
+                *RIGHT
+            )
+            self.triangle(
+                *p4, *p16, *p15,
+                *RIGHT
+            )
+            self.triangle(
+                *p4, *p8, *p16,
+                *RIGHT
+            )
+            self.triangle(
+                *p8, *p14, *p16,
+                *RIGHT
+            )
+            self.triangle(
+                *p8, *p6, *p14,
+                *RIGHT
+            )
+            self.triangle(
+                *p6, *p13, *p14,
+                *RIGHT
+            )
+            self.triangle(
+                *p6, *p2, *p13,
+                *RIGHT
+            )
+
+            # INNER
+            self.rect(
+                *p9, *p14, *p10,
+                *BACK
+            )
+            self.rect(
+                *p11, *p16, *p12,
+                *FRONT
+            )
+            self.rect(
+                *p9, *p15, *p11,
+                *TOP
+            )
+            self.rect(
+                *p12, *p14, *p16,
+                *BOTTOM
+            )
+
+        return self
+
+    def triangle(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        x2: float,
+        y2: float,
+        z2: float,
+        x3: float,
+        y3: float,
+        z3: float,
+        nx: float,
+        ny: float,
+        nz: float,
+        ) -> State:
+        p1 = Point(x, y, z)
+        p2 = Point(x2, y2, z2)
+        p3 = Point(x3, y3, z3)
+        face = Face([p1, p2, p3], normal=Point(nx, ny, nz))
+
+        self.faces.append(face)
         return self
 
     def rect(
