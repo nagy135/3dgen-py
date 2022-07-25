@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-from pyrender import start
 from examples import *
+import os
 from state import State
 
 def main():
@@ -23,8 +23,6 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.preview_mode:
-        print("OPEN PREVIEW")
 
     state = State()
 
@@ -36,7 +34,7 @@ def main():
         f.write(state.stl_str)
 
     if args.preview_mode:
-        start(args.filename)
+        os.system(f"stlviewer {args.filename}")
 
 
 def generate_logic(state: State):
