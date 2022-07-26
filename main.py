@@ -38,7 +38,7 @@ def main():
 
 
 def generate_logic(state: State):
-    example_box(state)
+    example_prism(state)
 
 
 if __name__ == "__main__":

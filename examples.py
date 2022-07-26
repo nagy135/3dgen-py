@@ -16,6 +16,50 @@ def example_face(state: State):
         0, -1, 0
     )
 
+def example_prism(state: State):
+    u = 40
+    p1 = (0, 0, u)
+    p2 = (u, 0, u)
+    p3 = (u, u, u)
+    p4 = (0, u, u)
+    p5 = (u/2, u/2, u*2)
+    state.box(0,0,0, u)
+    state.prism(
+        *p1,
+        *p2,
+        *p4,
+        *p5
+    )
+    state.prism(
+        *p2,
+        *p3,
+        *p4,
+        *p5
+    )
+
+def example_crown(state: State):
+    u = 40
+    p1 = (0, 0, u)
+    p2 = (u, 0, u)
+    p3 = (u, u, u)
+    p4 = (0, u, u)
+
+    p5 = (0, 0, 2*u)
+    p6 = (u, u, 2*u)
+    state.box(0,0,0,u)
+    state.prism(
+        *p1,
+        *p2,
+        *p4,
+        *p5,
+    )
+    state.prism(
+        *p2,
+        *p3,
+        *p4,
+        *p6,
+    )
+
 def example_box(state: State):
     u = 60
     state.cuboid(
@@ -28,6 +72,11 @@ def example_box(state: State):
         u,u,u,
         10, 10, None
     )
+    state.box(0,u,0,u)
+    state.box(0,u,u,u)
+
+    state.box(0,-u,0,u)
+    state.box(0,-u,u,u)
 
 
 
