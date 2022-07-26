@@ -285,6 +285,43 @@ class State:
             self.rect(*p9, *p15, *p11, *TOP)
             self.rect(*p12, *p14, *p16, *BOTTOM)
 
+        if g_y is None and g_x is not None and g_z is not None:
+            p9 = x + g_x, y, z + g_z
+            p10 = x + w_x - g_x, y, z + g_z
+            p11 = x + g_x, y, z + w_z - g_z
+            p12 = x + w_x - g_x, y, z + w_z - g_z
+            p13 = x + g_x, y + w_y, z + g_z
+            p14 = x + w_x - g_x, y + w_y, z + g_z
+            p15 = x + g_x, y + w_y, z + w_z - g_z
+            p16 = x + w_x - g_x, y + w_y, z + w_z - g_z
+
+            # FRONT
+            self.triangle(*p1, *p9, *p10, *FRONT)
+            self.triangle(*p1, *p10, *p2, *FRONT)
+            self.triangle(*p2, *p12, *p6, *FRONT)
+            self.triangle(*p2, *p10, *p12, *FRONT)
+            self.triangle(*p6, *p11, *p5, *FRONT)
+            self.triangle(*p6, *p12, *p11, *FRONT)
+            self.triangle(*p5, *p11, *p9, *FRONT)
+            self.triangle(*p5, *p9, *p1, *FRONT)
+
+            # BACK
+            self.triangle(*p4, *p14, *p13, *BACK)
+            self.triangle(*p4, *p13, *p3, *BACK)
+            self.triangle(*p3, *p13, *p15, *BACK)
+            self.triangle(*p3, *p15, *p7, *BACK)
+            self.triangle(*p7, *p15, *p16, *BACK)
+            self.triangle(*p7, *p16, *p8, *BACK)
+            self.triangle(*p8, *p16, *p14, *BACK)
+            self.triangle(*p8, *p14, *p4, *BACK)
+
+            # INNER
+            self.rect(*p10, *p13, *p9, *TOP)
+            self.rect(*p11, *p16, *p15, *BOTTOM)
+            self.rect(*p9, *p15, *p11, *RIGHT)
+            self.rect(*p14, *p12, *p16, *LEFT)
+
+
         return self
 
     def triangle(

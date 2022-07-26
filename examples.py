@@ -3,9 +3,7 @@ from main import State
 def example_gap(state: State):
     gap = 5
     u = 50
-    state.box(0,0,0,u)
-    state.box(0,0,u,u)
-    state.cuboid(u, 0, u, u, u, u, gap, gap, None)
+    state.cuboid(u, 0, u, u, u, u, gap, None, gap)
 
 def example_face(state: State):
     u = 10
@@ -36,6 +34,45 @@ def example_prism(state: State):
         *p4,
         *p5
     )
+
+def example_castle(state: State):
+    u = 30
+    gap = 3
+
+    # BASE
+    state.box(0,0,0, u)
+    state.box(u,0,0, u)
+    state.box(2*u,0,0, u)
+    state.box(0,2*u,0, u)
+    state.box(u,2*u,0, u)
+    state.box(2*u,2*u,0, u)
+    state.box(0,u,0, u)
+    state.box(2*u,u,0, u)
+
+    for x,y in [(0,0),(2*u,0), (2*u, 2*u), (0, 2*u)]:
+        state.box(x,y,u,u)
+        state.box(x,y,u*2,u)
+        p1 = (x, y, u*3)
+        p2 = (x+u, y, u*3)
+        p3 = (x+u, y+u, u*3)
+        p4 = (x, y+u, u*3)
+        p5 = (x+u/2, y+u/2, u*4)
+        state.prism(
+            *p1,
+            *p2,
+            *p4,
+            *p5
+        )
+        state.prism(
+            *p2,
+            *p3,
+            *p4,
+            *p5
+        )
+    state.cuboid(0,u,u, u,u,u, gap, gap, None)
+    state.cuboid(u*2,u,u, u,u,u, gap, gap, None)
+    state.cuboid(u,0,u, u,u,u, gap, gap, None)
+    state.cuboid(u,u*2,u, u,u,u, gap, gap, None)
 
 def example_crown(state: State):
     u = 40
