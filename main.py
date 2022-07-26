@@ -38,7 +38,7 @@ def main():
 
 
 def generate_logic(state: State):
-    example_prism(state)
+    example_gap(state)
 
 
 if __name__ == "__main__":
