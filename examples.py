@@ -18,41 +18,16 @@ def example_face(state: State):
 
 def example_box(state: State):
     u = 60
-    # state.box(
-    #     0, 0, 0,
-    #     u
-    # )
-    # state.box(
-    #     0, 0, u,
-    #     u
-    # )
-    # state.box(
-    #     2*u, 0, 0,
-    #     u
-    # )
-    # state.box(
-    #     2*u, 0, u,
-    #     u
-    # )
-    state.box( 0, 0, 0, u)
-    state.box( 0, 0, u, u)
-    state.box( u*2, 0, 0, u)
-    state.box( u*2, 0, u, u)
     state.cuboid(
-        u, 0, u,
+        0, 0, 0,
+        u,u,u,
+        None, 10, 10
+    )
+    state.cuboid(
+        0, 0, u,
         u,u,u,
         10, 10, None
     )
-    # state.cuboid(
-    #     u*2, 0, u*2,
-    #     u,u,u,
-    #     None, 5, 5
-    # )
-    # state.cuboid(
-    #     0, 0, u*2,
-    #     u,u,u,
-    #     None, 5, 5
-    # )
 
 
 

@@ -144,7 +144,7 @@ class State:
             self.rect(
                 x, y+w_y, z,
                 x+w_x, y+w_y, z+w_z,
-                x, y+w_y, z+w_z,
+                x+w_x, y+w_y, z,
                 *BACK,
                 True
             )
@@ -152,14 +152,14 @@ class State:
             self.rect(
                 x, y, z,
                 x, y+w_y, z+w_z,
-                x, y, z+w_z,
+                x, y+w_y, z,
                 *LEFT,
                 True
             )
             self.rect(
                 x+w_x, y, z,
                 x+w_x, y+w_y, z+w_z,
-                x+w_x, y+w_y, z,
+                x+w_x, y, z+w_z,
                 *RIGHT,
                 True
             )
@@ -203,35 +203,35 @@ class State:
 
             # BOTTOM
             self.triangle(
-                *p11, *p12, *p3,
+                *p11, *p3, *p12,
                 *BOTTOM
             )
             self.triangle(
-                *p3, *p12, *p4,
+                *p3, *p4, *p12,
                 *BOTTOM
             )
             self.triangle(
-                *p4, *p12, *p10,
+                *p4, *p10, *p12,
                 *BOTTOM
             )
             self.triangle(
-                *p4, *p10, *p2,
+                *p4, *p2, *p10,
                 *BOTTOM
             )
             self.triangle(
-                *p2, *p10, *p9,
+                *p2, *p9, *p10,
                 *BOTTOM
             )
             self.triangle(
-                *p2, *p9, *p1,
+                *p2, *p1, *p9,
                 *BOTTOM
             )
             self.triangle(
-                *p1, *p9, *p11,
+                *p1, *p11, *p9,
                 *BOTTOM
             )
             self.triangle(
-                *p1, *p11, *p3,
+                *p1, *p3, *p11,
                 *BOTTOM
             )
 
