@@ -13,6 +13,23 @@ def example_face(state: State):
         u, 0, 0,
         0, -1, 0
     )
+def window_part(state: State):
+    small_arm = 10
+    longer_arm = 15
+    long_arm = 53
+    height = 15
+
+    u = 2
+    state.cuboid(0,u,0,u,u,height)
+    state.cuboid(0,0,0,u, u, height)
+    state.cuboid(u,0,0, small_arm, u, height)
+    state.cuboid(u+small_arm,0,0,u, u, height)
+    state.cuboid(u+small_arm,u,0,u, long_arm, height)
+    state.cuboid(u+small_arm,u+long_arm,0,u, u, height)
+    state.cuboid(u+small_arm,u+long_arm,0,-longer_arm+u, u, height)
+    state.cuboid(u+small_arm-longer_arm,long_arm+u,0,u, u, height)
+    state.cuboid(u+small_arm-longer_arm,long_arm,0,u, u, height)
+    state.cuboid(u+small_arm-longer_arm,long_arm-u,0,u, u, height)
 
 def example_prism(state: State):
     u = 40
