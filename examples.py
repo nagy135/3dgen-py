@@ -18,13 +18,30 @@ def window_part(state: State):
     longer_arm = 15
     long_arm = 53
     height = 15
+    gap_border_width = 1.3
 
     u = 2
     state.cuboid(0,u,0,u,u,height)
     state.cuboid(0,0,0,u, u, height)
     state.cuboid(u,0,0, small_arm, u, height)
     state.cuboid(u+small_arm,0,0,u, u, height)
-    state.cuboid(u+small_arm,u,0,u, long_arm, height)
+
+    n = 10
+    piece_width = long_arm/n
+    for i in range(n):
+        state.cuboid(
+            u+small_arm,
+            u+i*piece_width,
+            0,
+            u,
+            piece_width,
+            height,
+            None,
+            gap_border_width,
+            gap_border_width
+        )
+
+
     state.cuboid(u+small_arm,u+long_arm,0,u, u, height)
     state.cuboid(u+small_arm,u+long_arm,0,-longer_arm+u, u, height)
     state.cuboid(u+small_arm-longer_arm,long_arm+u,0,u, u, height)
