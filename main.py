@@ -38,7 +38,7 @@ def main():
 
 
 def generate_logic(state: State):
-    example_gap(state)
+    window_part(state)
 
 
 if __name__ == "__main__":
