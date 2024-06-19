@@ -13,6 +13,8 @@ BOTTOM = (0, 0, -1)
 LEFT = (-1, 0, 0)
 RIGHT = (1, 0, 0)
 
+PERFORMANCE = True
+
 
 class Point:
     x: float
@@ -111,8 +113,9 @@ class State:
         self.name = name
 
     def update_str_state(self):
-        self.prune_duplicate_walls()
-        self.prune_duplicate_faces()
+        if not PERFORMANCE:
+            self.prune_duplicate_walls()
+            self.prune_duplicate_faces()
         self.stl_str = f"solid {self.name}\n"
         self.stl_str += indent(faces_str(self.faces), INDENT_TAB)
         self.stl_str += "endsolid"
@@ -385,6 +388,66 @@ class State:
             vectB = (third[0] - first[0], third[1] - first[1], third[2] - first[2])
             self.triangle(*first, *second, *third, *np.cross(vectA, vectB))
 
+        return self
+
+    def grid(
+            self,
+            sections_x: int,
+            sections_y: int,
+            cell_size: float,
+            height: float
+            ) -> State:
+        # bottom 
+        self.rect(0,0,0,
+                  0, sections_y*cell_size, 0,
+                  sections_x*cell_size, 0, 0,
+                  0, 0, -1
+                  )
+
+        # left 
+        self.rect(0,0,0,
+                  0, sections_y*cell_size, height,
+                  0, sections_y*cell_size, 0,
+                  0, 0, -1
+                  )
+
+        # right 
+        self.rect(sections_x*cell_size,0,0,
+                  sections_x*cell_size, sections_y*cell_size, height,
+                  sections_x*cell_size, sections_y*cell_size, 0,
+                  0, 0, -1
+                  )
+        # front 
+        self.rect(0,0,0,
+                  sections_x*cell_size, 0, height,
+                  0, 0, height,
+                  0, 0, -1
+                  )
+        # back 
+        self.rect(0,sections_y*cell_size,0,
+                  sections_x*cell_size, sections_y*cell_size, height,
+                  0, sections_y*cell_size, height,
+                  0, 0, -1
+                  )
+        for i in range(sections_x):
+            print(i)
+            for j in range(sections_y):
+                # top
+                self.rect(
+                        i*cell_size,
+                        j*cell_size,
+                        height,
+
+                        i*cell_size + cell_size,
+                        j*cell_size,
+                        height,
+
+                        i*cell_size,
+                        j*cell_size + cell_size,
+                        height,
+
+                        0, 0, 1
+                        )
         return self
 
     def rect(

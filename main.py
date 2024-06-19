@@ -38,7 +38,7 @@ def main():
 
 
 def generate_logic(state: State):
-    window_part(state)
+    image(state)
 
 
 if __name__ == "__main__":
