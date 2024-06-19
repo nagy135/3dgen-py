@@ -1,11 +1,7 @@
 from __future__ import annotations
 
 from typing import List, Set
-import warnings
 import sys
-
-warnings.filterwarnings("ignore")
-
 
 class Point:
     x: int
@@ -88,7 +84,7 @@ class State:
         self.faces = new_faces
 
     def box(
-        self, x: int, y: int, z: int, side: int, format: str = "matplotlib"
+        self, x: int, y: int, z: int, side: int
     ) -> State:
         coordinates = [
             [x, y, z],
@@ -122,26 +118,15 @@ class State:
 def main():
 
     state = State()
-    # state.box(0, 0, 0, 20, "obj")
-    #
-    # state.box(20, 0, 0, 20, "obj")
-    # state.box(20, 0, 20, 20, "obj")
-    # state.box(20, 0, 40, 20, "obj")
-    # state.box(20, 0, 60, 20, "obj")
-    # state.box(40, 0, 60, 20, "obj")
-    # state.box(40, 0, 80, 20, "obj")
-    # state.box(40, 0, 100, 20, "obj")
-    # state.box(60, 0, 100, 20, "obj")
-
     side = 20
     x_offset = 0
     z_offset = 0
     for _ in range(1, 7):
-        state.box(x_offset, 0, z_offset, side, "obj")
+        state.box(x_offset, 0, z_offset, side)
         x_offset += side
-        state.box(x_offset, 0, z_offset, side, "obj")
+        state.box(x_offset, 0, z_offset, side)
         z_offset += side
-        state.box(x_offset, 0, z_offset, side, "obj")
+        state.box(x_offset, 0, z_offset, side)
         z_offset += side
 
     state.remove_duplicate_faces()
